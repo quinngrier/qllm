@@ -53,8 +53,6 @@ while :; do
     break
   fi
 
-  printf '\n\n%s\n\n\n' "$model_heading" >>qllm.txt
-
   eval " $gawk -v q=\\' "\''
 
     function json_quote(buffer,    c, r, s) {
@@ -124,6 +122,9 @@ while :; do
     -H "Authorization: Bearer $bearer" \
     -H "Content-Type: application/json" \
     --data-binary @- \
-  | jq -r '.candidates[0].content.parts[0].text' >>qllm.txt
+  | jq -r '.candidates[0].content.parts[0].text' | {
+    printf '\n\n%s\n\n\n' "$model_heading"
+    cat
+  } >>qllm.txt
 
 done
