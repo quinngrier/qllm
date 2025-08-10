@@ -118,7 +118,7 @@ while :; do
       print "{\"contents\": [" contents "]}";
     }
 
-  '\' qllm.txt | tee /dev/stderr | curl -L -S -f -s \
+  '\' qllm.txt | curl -L -S -f -s \
     -X POST \
     --url "https://$location-aiplatform.googleapis.com/v1/projects/$project/locations/$location/$model:generateContent" \
     -H "Authorization: Bearer $bearer" \
