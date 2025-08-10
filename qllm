@@ -25,6 +25,8 @@ bearer=$(gcloud auth print-access-token)
 project=$(gcloud config get-value project)
 location=us-central1
 
+session_file=qllm.txt
+
 # Listed in Google Cloud's web UI under Vertex AI > Model Garden.
 model=publishers/google/models/gemini-2.5-flash
 #model=publishers/google/models/gemini-2.5-pro
@@ -34,26 +36,26 @@ model_heading='@@@ Model -------------------------------------------------------
 
 while :; do
 
-  if [[ -s qllm.txt ]]; then
-    x=$(tail -n 3 qllm.txt; echo x)
+  if [[ -s "$session_file" ]]; then
+    x=$(tail -n 3 -- "$session_file"; echo x)
     if [[ $x != "$user_heading"$'\n\n\nx' ]]; then
-      printf '\n\n%s\n\n\n' "$user_heading" >>qllm.txt
+      printf '\n\n%s\n\n\n' "$user_heading" >>"$session_file"
     fi
   else
-    printf '%s\n\n\n' "$user_heading" >>qllm.txt
+    printf '%s\n\n\n' "$user_heading" >>"$session_file"
   fi
 
-  hash1=$(sha256sum -b qllm.txt)
+  hash1=$(sha256sum -b -- "$session_file")
 
-  eval " $editor qllm.txt"
+  eval " $editor -- ${session_file@Q}"
 
-  hash2=$(sha256sum -b qllm.txt)
+  hash2=$(sha256sum -b -- "$session_file")
 
   if [[ $hash1 == "$hash2" ]]; then
     break
   fi
 
-  eval " $gawk -v q=\\' "\''
+  eval " $gawk -v q=\\' -- "\''
 
     function json_quote(buffer,    c, r, s) {
       c = "jq -R -s .";
@@ -116,7 +118,7 @@ while :; do
       print "{\"contents\": [" contents "]}";
     }
 
-  '\' qllm.txt | curl -L -S -f -s \
+  '\' "$session_file" | curl -L -S -f -s \
     -X POST \
     --url "https://$location-aiplatform.googleapis.com/v1/projects/$project/locations/$location/$model:generateContent" \
     -H "Authorization: Bearer $bearer" \
@@ -125,6 +127,6 @@ while :; do
   | jq -r '.candidates[0].content.parts[0].text' | {
     printf '\n\n%s\n\n' "$model_heading"
     cat
-  } >>qllm.txt
+  } >>"$session_file"
 
 done
