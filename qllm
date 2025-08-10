@@ -31,8 +31,16 @@ session_file=qllm.txt
 model=publishers/google/models/gemini-2.5-flash
 #model=publishers/google/models/gemini-2.5-pro
 
-user_heading='@@@ User ---------------------------------------------------------------'
-model_heading='@@@ Model --------------------------------------------------------------'
+printf -v blank_heading -- -%.s {1..72}
+readonly blank_heading
+
+user_heading='@@@ User '
+user_heading+=${blank_heading:${#user_heading}}
+readonly user_heading
+
+model_heading='@@@ Model '
+model_heading+=${blank_heading:${#model_heading}}
+readonly model_heading
 
 while :; do
 
