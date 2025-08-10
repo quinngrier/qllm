@@ -1,0 +1,61 @@
+//
+// The authors of this file have waived all copyright and
+// related or neighboring rights to the extent permitted by
+// law as described by the CC0 1.0 Universal Public Domain
+// Dedication. You should have received a copy of the full
+// dedication along with this file, typically as a file
+// named <CC0-1.0.txt>. If not, it may be available at
+// <https://creativecommons.org/publicdomain/zero/1.0/>.
+//
+
+= Qllm
+:experimental:
+
+:x_download_url: https://raw.githubusercontent.com/quinngrier/qllm/main/qllm
+:x_man_page_url: https://github.com/quinngrier/qllm/blob/main/qllm.1.adoc
+
+Qllm is a large language model CLI wrapper.
+
+Here's how to get started:
+
+. Make sure you have the following tools installed:
+
+.. Bash version 5.2.21 or later.
+You can check this by running `bash --version`.
+
+.. curl version 8.5.0 or later.
+You can check this by running `curl --version`.
+
+.. GNU Awk version 5.2.1 or later.
+You can check this by running `gawk --version`.
+
+.. For Vertex AI:
+
+... Google Cloud SDK version 532.0.0 or later.
+You can check this by running `gcloud --version`.
+
+. Download the link:{x_download_url}[`qllm`] script and optionally put
+it in your `PATH`.
+
+. Set your `VISUAL` environment variable to your desired text editor.
+For example, `export VISUAL=vim`.
+
+. Optionally set your `VISUAL_BOTTOM` environment variable to the CLI
+arguments needed to make your editor scroll to the last line when
+opening a file.
+For example, `export VISUAL_BOTTOM=+` or
+`export VISUAL_BOTTOM='-c "normal G"'` will work for `vim`.
+
+. For Vertex AI:
+
+.. Make sure `gcloud` is configured such that running
+`gcloud auth print-access-token` and `gcloud config get-value project`
+output the right things.
+
+. Run `qllm` to start or resume a chat session in `qllm.txt`.
+Wait for your editor to open, type your input at the bottom, save the
+file and close your editor, and repeat.
+When you want to quit, close your editor without making any changes
+(which is checked via hashing, not last-modified time).
+
+//
