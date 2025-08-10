@@ -29,8 +29,8 @@ location=us-central1
 model=publishers/google/models/gemini-2.5-flash
 #model=publishers/google/models/gemini-2.5-pro
 
-user_heading='% User -----------------------------------------------------------------'
-model_heading='% Model ----------------------------------------------------------------'
+user_heading='@@@ User ---------------------------------------------------------------'
+model_heading='@@@ Model --------------------------------------------------------------'
 
 while :; do
 
@@ -91,11 +91,11 @@ while :; do
     }
 
     {
-      if (/^% *User( .*)$/) {
+      if (/^@@@ *User( .*)$/) {
         add_text(role, buffer);
         role = "user";
         buffer = "";
-      } else if (/^% *Model( .*)$/) {
+      } else if (/^@@@ *Model( .*)$/) {
         add_text(role, buffer);
         role = "model";
         buffer = "";
