@@ -86,6 +86,7 @@ while :; do
     }
 
     BEGIN {
+      IGNORECASE = 1;
       role = "";
       buffer = "";
     }
