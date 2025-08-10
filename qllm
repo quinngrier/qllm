@@ -55,75 +55,80 @@ while :; do
     break
   fi
 
-  eval " $gawk -v q=\\' -- "\''
+  blah=$(
+    eval " $gawk -v q=\\' -- "\''
 
-    function json_quote(buffer,    c, r, s) {
-      c = "jq -R -s .";
-      print buffer |& c;
-      s = close(c, "to");
-      if (s != 0) {
-        print "\"" c "\" failed" >"/dev/stderr";
-        exit 1;
-      }
-      c |& getline r;
-      s = close(c);
-      if (s != 0) {
-        print "\"" c "\" failed" >"/dev/stderr";
-        exit 1;
-      }
-      return r;
-    }
-
-    function add_text(role, buffer,    p, c) {
-      if (role) {
-        p = "{\"text\": " json_quote(buffer) "}";
-        c = "{\"role\": \"" role "\", \"parts\": [" p "]}";
-        if (contents) {
-          contents = contents ",";
+      function json_quote(buffer,    c, r, s) {
+        c = "jq -R -s .";
+        print buffer |& c;
+        s = close(c, "to");
+        if (s != 0) {
+          print "\"" c "\" failed" >"/dev/stderr";
+          exit 1;
         }
-        contents = contents c;
+        c |& getline r;
+        s = close(c);
+        if (s != 0) {
+          print "\"" c "\" failed" >"/dev/stderr";
+          exit 1;
+        }
+        return r;
       }
-    }
 
-    BEGIN {
-      IGNORECASE = 1;
-      role = "";
-      buffer = "";
-    }
+      function add_text(role, buffer,    p, c) {
+        if (role) {
+          p = "{\"text\": " json_quote(buffer) "}";
+          c = "{\"role\": \"" role "\", \"parts\": [" p "]}";
+          if (contents) {
+            contents = contents ",";
+          }
+          contents = contents c;
+        }
+      }
 
-    {
-      if (/^@@@ *User( .*)$/) {
-        add_text(role, buffer);
-        role = "user";
+      BEGIN {
+        IGNORECASE = 1;
+        role = "";
         buffer = "";
-      } else if (/^@@@ *Model( .*)$/) {
-        add_text(role, buffer);
-        role = "model";
-        buffer = "";
-      } else if (role == "user") {
-        if (buffer) {
-          buffer = buffer "\n";
-        }
-        buffer = buffer $0;
-      } else if (role == "model") {
-        if (buffer) {
-          buffer = buffer "\n";
-        }
-        buffer = buffer $0;
       }
-    }
 
-    END {
-      add_text(role, buffer);
-      print "{\"contents\": [" contents "]}";
-    }
+      {
+        if (/^@@@ *User( .*)$/) {
+          add_text(role, buffer);
+          role = "user";
+          buffer = "";
+        } else if (/^@@@ *Model( .*)$/) {
+          add_text(role, buffer);
+          role = "model";
+          buffer = "";
+        } else if (role == "user") {
+          if (buffer) {
+            buffer = buffer "\n";
+          }
+          buffer = buffer $0;
+        } else if (role == "model") {
+          if (buffer) {
+            buffer = buffer "\n";
+          }
+          buffer = buffer $0;
+        }
+      }
 
-  '\' "$session_file" | curl -L -S -f -s \
+      END {
+        add_text(role, buffer);
+        print "{\"contents\": [" contents "]}";
+      }
+
+    '\' "$session_file"
+  )
+
+  curl -L -S -f -s \
     -X POST \
     --url "https://$location-aiplatform.googleapis.com/v1/projects/$project/locations/$location/$model:generateContent" \
     -H "Authorization: Bearer $bearer" \
     -H "Content-Type: application/json" \
     --data-binary @- \
+    <<<"$blah" \
   | jq -r '.candidates[0].content.parts[0].text' | {
     printf '\n\n%s\n\n' "$model_heading"
     cat
