@@ -32,7 +32,7 @@ You can check this by running `gawk --version`.
 .. jq version 1.7 or later.
 You can check this by running `jq --version`.
 
-.. For Vertex AI:
+.. If you plan to use Vertex AI:
 
 ... Google Cloud SDK version 532.0.0 or later.
 You can check this by running `gcloud --version`.
@@ -47,9 +47,9 @@ For example, `export VISUAL=vim`.
 arguments needed to make your editor scroll to the last line when
 opening a file.
 For example, `export VISUAL_BOTTOM=+` or
-`export VISUAL_BOTTOM='-c "normal G"'` will work for `vim`.
+`export VISUAL_BOTTOM='-c "normal G"'` will work for Vim.
 
-. For Vertex AI:
+. If you plan to use Vertex AI:
 
 .. Make sure `gcloud` is configured such that running
 `gcloud auth print-access-token` and `gcloud config get-value project`
