@@ -36,6 +36,7 @@ search_up_or_home() {
 
 declare -r \
   default_system_prompt="You and the user are experts. Keep your answers short. Don't show any personality." \
+  nl=$'\n' \
   qllm_dir_name=.qllm \
 ;
 
@@ -98,6 +99,7 @@ while :; do
 
   blah=$(
     eval " $gawk"' \
+      -v nl="$nl" \
       -v sq=\'\'' \
       -v system_prompt="$system_prompt" \
       -- \
@@ -122,6 +124,8 @@ while :; do
 
         function add_text(role, buffer,    p, c) {
           if (role) {
+            sub("^" nl "*", "", buffer);
+            sub(nl "*$", "", buffer);
             p = "{\"text\": " json_quote(buffer) "}";
             c = "{\"role\": \"" role "\", \"parts\": [" p "]}";
             if (contents) {
@@ -146,16 +150,8 @@ while :; do
             add_text(role, buffer);
             role = "model";
             buffer = "";
-          } else if (role == "user") {
-            if (buffer) {
-              buffer = buffer "\n";
-            }
-            buffer = buffer $0;
-          } else if (role == "model") {
-            if (buffer) {
-              buffer = buffer "\n";
-            }
-            buffer = buffer $0;
+          } else if (role) {
+            buffer = buffer "\n" $0;
           }
         }
 
