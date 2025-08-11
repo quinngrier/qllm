@@ -38,6 +38,7 @@ declare -r \
   default_system_prompt="You and the user are experts. Keep your answers short. Don't show any personality." \
   nl=$'\n' \
   qllm_dir_name=.qllm \
+  sq=\' \
 ;
 
 system_prompt=$default_system_prompt
@@ -100,7 +101,7 @@ while :; do
   blah=$(
     eval " $gawk"' \
       -v nl="$nl" \
-      -v sq=\'\'' \
+      -v sq="$sq" \
       -v system_prompt="$system_prompt" \
       -- \
       '\''
