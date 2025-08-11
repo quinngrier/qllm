@@ -13,6 +13,39 @@
 set -E -e -u -o pipefail || exit $?
 trap exit ERR
 
+search_up() {
+  local -n search_up__r=$1
+  local search_up__d="$PWD"
+  while [[ $search_up__d ]]; do
+    search_up__r=${search_up__d%/}/$2
+    if [[ -e $search_up__r ]]; then
+      return
+    fi
+    search_up__d=${search_up__d%/*}
+  done
+  search_up__r=
+}; readonly -f search_up
+
+search_up_or_home() {
+  local -n search_up_or_home__r=$1
+  search_up search_up_or_home__r "$2"
+  if [[ ! $search_up_or_home__r && -e $HOME/$2 ]]; then
+    search_up_or_home__r=$HOME/$2
+  fi
+}; readonly -f search_up_or_home
+
+declare -r \
+  default_system_prompt="You and the user are experts. Keep your answers short. Don't show any personality." \
+  qllm_dir_name=.qllm \
+;
+
+system_prompt=$default_system_prompt
+
+search_up_or_home x $qllm_dir_name/system_prompts/default
+if [[ $x ]]; then
+  system_prompt=$(<"$x")
+fi
+
 if (($# > 0)); then
   printf '%s\n' "Arguments are not supported yet." >&2
   exit 1
@@ -64,70 +97,84 @@ while :; do
   fi
 
   blah=$(
-    eval " $gawk -v q=\\' -- "\''
+    eval " $gawk"' \
+      -v q=\'\'' \
+      -v system_prompt="$system_prompt" \
+      -- \
+      '\''
 
-      function json_quote(buffer,    c, r, s) {
-        c = "jq -R -s .";
-        print buffer |& c;
-        s = close(c, "to");
-        if (s != 0) {
-          print "\"" c "\" failed" >"/dev/stderr";
-          exit 1;
-        }
-        c |& getline r;
-        s = close(c);
-        if (s != 0) {
-          print "\"" c "\" failed" >"/dev/stderr";
-          exit 1;
-        }
-        return r;
-      }
-
-      function add_text(role, buffer,    p, c) {
-        if (role) {
-          p = "{\"text\": " json_quote(buffer) "}";
-          c = "{\"role\": \"" role "\", \"parts\": [" p "]}";
-          if (contents) {
-            contents = contents ",";
+        function json_quote(buffer,    c, r, s) {
+          c = "jq -R -s .";
+          print buffer |& c;
+          s = close(c, "to");
+          if (s != 0) {
+            print "\"" c "\" failed" >"/dev/stderr";
+            exit 1;
           }
-          contents = contents c;
+          c |& getline r;
+          s = close(c);
+          if (s != 0) {
+            print "\"" c "\" failed" >"/dev/stderr";
+            exit 1;
+          }
+          return r;
         }
-      }
 
-      BEGIN {
-        IGNORECASE = 1;
-        role = "";
-        buffer = "";
-      }
+        function add_text(role, buffer,    p, c) {
+          if (role) {
+            p = "{\"text\": " json_quote(buffer) "}";
+            c = "{\"role\": \"" role "\", \"parts\": [" p "]}";
+            if (contents) {
+              contents = contents ",";
+            }
+            contents = contents c;
+          }
+        }
 
-      {
-        if (/^@@@ *User( .*)$/) {
-          add_text(role, buffer);
-          role = "user";
+        BEGIN {
+          IGNORECASE = 1;
+          role = "";
           buffer = "";
-        } else if (/^@@@ *Model( .*)$/) {
-          add_text(role, buffer);
-          role = "model";
-          buffer = "";
-        } else if (role == "user") {
-          if (buffer) {
-            buffer = buffer "\n";
-          }
-          buffer = buffer $0;
-        } else if (role == "model") {
-          if (buffer) {
-            buffer = buffer "\n";
-          }
-          buffer = buffer $0;
         }
-      }
 
-      END {
-        add_text(role, buffer);
-        print "{\"contents\": [" contents "]}";
-      }
+        {
+          if (/^@@@ *User( .*)$/) {
+            add_text(role, buffer);
+            role = "user";
+            buffer = "";
+          } else if (/^@@@ *Model( .*)$/) {
+            add_text(role, buffer);
+            role = "model";
+            buffer = "";
+          } else if (role == "user") {
+            if (buffer) {
+              buffer = buffer "\n";
+            }
+            buffer = buffer $0;
+          } else if (role == "model") {
+            if (buffer) {
+              buffer = buffer "\n";
+            }
+            buffer = buffer $0;
+          }
+        }
 
-    '\' "$session_file"
+        END {
+          add_text(role, buffer);
+          x = json_quote(system_prompt);
+          x = "{\"text\": " x "}";
+          x = "{\"parts\": [" x "]}";
+          body = "{";
+          body = body "\"systemInstruction\": " x;
+          body = body ", ";
+          body = body "\"contents\": [" contents "]"
+          body = body "}";
+          print body;
+        }
+
+      '\'' \
+      "$session_file" \
+    ;'
   )
 
   curl -L -S -f -s \
