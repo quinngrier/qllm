@@ -29,6 +29,9 @@ You can check this by running `curl --version`.
 .. GNU Awk version 5.2.1 or later.
 You can check this by running `gawk --version`.
 
+.. jq version 1.7 or later.
+You can check this by running `jq --version`.
+
 .. For Vertex AI:
 
 ... Google Cloud SDK version 532.0.0 or later.
