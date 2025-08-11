@@ -104,7 +104,7 @@ while :; do
       '\''
 
         function json_quote(buffer,    c, r, s) {
-          c = "jq -R -s .";
+          c = "jq -R -s \".[:-1]\"";
           print buffer |& c;
           s = close(c, "to");
           if (s != 0) {
