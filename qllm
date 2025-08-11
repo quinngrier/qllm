@@ -98,7 +98,7 @@ while :; do
 
   blah=$(
     eval " $gawk"' \
-      -v q=\'\'' \
+      -v sq=\'\'' \
       -v system_prompt="$system_prompt" \
       -- \
       '\''
