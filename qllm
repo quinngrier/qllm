@@ -124,33 +124,35 @@ while :; do
         }
 
         function add_text(role, buffer,    p, c) {
-          if (role) {
-            sub("^" nl "*", "", buffer);
-            sub(nl "*$", "", buffer);
-            p = "{\"text\": " json_quote(buffer) "}";
-            c = "{\"role\": \"" role "\", \"parts\": [" p "]}";
-            if (contents) {
-              contents = contents ",";
-            }
-            contents = contents c;
+          sub("^" nl "*", "", buffer);
+          sub(nl "*$", "", buffer);
+          p = "{\"text\": " json_quote(buffer) "}";
+          c = "{\"role\": \"" role "\", \"parts\": [" p "]}";
+          if (contents) {
+            contents = contents ",";
           }
+          contents = contents c;
         }
 
         BEGIN {
           IGNORECASE = 1;
-          role = "";
+          role = "user";
           buffer = "";
         }
 
         {
           if (/^@@@ *User( .*)$/) {
-            add_text(role, buffer);
-            role = "user";
-            buffer = "";
+            if (role != "user") {
+              add_text(role, buffer);
+              role = "user";
+              buffer = "";
+            }
           } else if (/^@@@ *Model( .*)$/) {
-            add_text(role, buffer);
-            role = "model";
-            buffer = "";
+            if (role != "model") {
+              add_text(role, buffer);
+              role = "model";
+              buffer = "";
+            }
           } else if (role) {
             buffer = buffer "\n" $0;
           }
