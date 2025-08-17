@@ -55,7 +55,7 @@ For example, `export VISUAL_BOTTOM=+` or
 `gcloud auth print-access-token` and `gcloud config get-value project`
 output the right things.
 
-. Run `qllm` to start or resume a chat session in `qllm.txt`.
+. Run `qllm` to start or resume a chat session in `default.qllm`.
 Wait for your editor to open, type your input at the bottom, save the
 file and close your editor, and repeat.
 When you want to quit, close your editor without making any changes
