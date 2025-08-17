@@ -48,10 +48,75 @@ if [[ $x ]]; then
   system_prompt=$(<"$x")
 fi
 
-if (($# > 0)); then
-  printf '%s\n' "Arguments are not supported yet." >&2
-  exit 1
+#-----------------------------------------------------------------------
+# Parse the command-line arguments
+#-----------------------------------------------------------------------
+
+parse_options=1
+
+unset session_file
+
+while (($# > 0)); do
+
+  if ((parse_options)); then
+
+    #-------------------------------------------------------------------
+    # Options terminator
+    #-------------------------------------------------------------------
+
+    case $1 in --)
+      parse_options=0
+      shift
+      continue
+
+    #-------------------------------------------------------------------
+    # Long options incorrectly given arguments
+    #-------------------------------------------------------------------
+
+    ;; --=* \
+    )
+      x=${1%%=*}
+      printf '%s\n' "$0: $x forbids an argument" >&2
+      exit 1
+
+    #-------------------------------------------------------------------
+    # Unknown long options
+    #-------------------------------------------------------------------
+
+    ;; --*)
+      x=${1%%=*}
+      printf '%s\n' "$0: Unknown option: ${x@Q}" >&2
+      exit 1
+
+    #-------------------------------------------------------------------
+    # Unknown short options
+    #-------------------------------------------------------------------
+
+    ;; -?*)
+      x=${1:0:2}
+      printf '%s\n' "$0: Unknown option: ${x@Q}" >&2
+      exit 1
+
+    #-------------------------------------------------------------------
+    esac
+  fi
+
+  if [[ ! ${session_file+x} ]]; then
+    session_file=$1
+  else
+    printf '%s\n' "$0: Too many operands" >&2
+    exit 1
+  fi
+
+  shift
+
+done
+
+if [[ ! ${session_file+x} ]]; then
+  session_file=default.qllm
 fi
+
+#-----------------------------------------------------------------------
 
 editor="${EDITOR-vi} ${EDITOR_BOTTOM-}"
 gawk=gawk
@@ -59,8 +124,6 @@ gawk=gawk
 bearer=$(gcloud auth print-access-token)
 project=$(gcloud config get-value project)
 location=us-central1
-
-session_file=default.qllm
 
 # Listed in Google Cloud's web UI under Vertex AI > Model Garden.
 model=publishers/google/models/gemini-2.5-flash
