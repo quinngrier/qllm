@@ -243,6 +243,7 @@ while :; do
 
   blah=$(
     eval " $gawk"' \
+      -v argv0="$0" \
       -v model="$model" \
       -v nl="$nl" \
       -v sq="$sq" \
@@ -255,14 +256,16 @@ while :; do
           print x |& c;
           s = close(c, "to");
           if (s != 0) {
-            print "\"" c "\" failed" >"/dev/stderr";
-            exit 1;
+            print argv0 ": \"" c "\" failed" >"/dev/stderr";
+            exit_status = 1;
+            exit exit_status;
           }
           c |& getline x;
           s = close(c);
           if (s != 0) {
-            print "\"" c "\" failed" >"/dev/stderr";
-            exit 1;
+            print argv0 ": \"" c "\" failed" >"/dev/stderr";
+            exit_status = 1;
+            exit exit_status;
           }
           return x;
         }
@@ -304,6 +307,9 @@ while :; do
         }
 
         END {
+          if (exit_status) {
+            exit exit_status;
+          }
           add_text(role, buffer);
           body = "{";
           body = body "\"model\": " json_quote(model);
