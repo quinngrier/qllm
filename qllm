@@ -175,10 +175,29 @@ fi
 
 #-----------------------------------------------------------------------
 
+unset vertex_bearer
+
+vertex_init() {
+  if [[ ! ${vertex_bearer+x} ]]; then
+    vertex_bearer=$(gcloud auth print-access-token)
+    vertex_project=$(gcloud config get-value project)
+    vertex_location=us-central1
+  fi
+  completions_url="https://$vertex_location-aiplatform.googleapis.com/v1beta1/projects/$vertex_project/locations/$vertex_location/endpoints/openapi/chat/completions"
+  completions_bearer=$vertex_bearer
+}; readonly -f vertex_init
+
+#-----------------------------------------------------------------------
+
 declare -A -r model_map=(
   # Listed in Google Cloud's web UI under Vertex AI > Model Garden.
   [vertex-gemini-2.5-flash]="google/gemini-2.5-flash"
   [vertex-gemini-2.5-pro]="google/gemini-2.5-pro"
+)
+
+declare -A -r init_functions=(
+  [vertex-gemini-2.5-flash]=vertex_init
+  [vertex-gemini-2.5-pro]=vertex_init
 )
 
 editor="${EDITOR-vi} ${EDITOR_BOTTOM-}"
@@ -195,38 +214,10 @@ model_heading='@@@ Model '
 model_heading+=${blank_heading:${#model_heading}}
 readonly model_heading
 
-unset completions_request
-
 while :; do
 
   model=${model_map[$QLLM_MODEL]}
-
-  case $QLLM_MODEL in ( \
-    vertex-gemini-2.5-flash | \
-    vertex-gemini-2.5-pro \
-  )
-    # TODO: Cache these
-    bearer=$(gcloud auth print-access-token)
-    project=$(gcloud config get-value project)
-    location=us-central1
-    if [[ ${completions_request+x} ]]; then
-      curl -L -S -f -s \
-        -X POST \
-        --url "https://$location-aiplatform.googleapis.com/v1beta1/projects/$project/locations/$location/endpoints/openapi/chat/completions" \
-        -H "Authorization: Bearer $bearer" \
-        -H "Content-Type: application/json" \
-        --data-binary @- \
-        <<<"$completions_request" \
-      | jq -r '.choices[0].message.content' | {
-        printf '\n\n%s\n\n' "$model_heading"
-        cat
-      } >>"$session_file"
-    fi
-
-  ;; (*)
-    printf '%s\n' "$0: Unknown model: ${QLLM_MODEL@Q}" >&2
-    exit 1
-  esac
+  ${init_functions[$QLLM_MODEL]}
 
   if [[ -s "$session_file" ]]; then
     x=$(tail -n 3 -- "$session_file"; echo x)
@@ -329,5 +320,17 @@ while :; do
       "$session_file" \
     ;'
   )
+
+  curl -L -S -f -s \
+    -X POST \
+    --url "$completions_url" \
+    -H "Authorization: Bearer $completions_bearer" \
+    -H "Content-Type: application/json" \
+    --data-binary @- \
+    <<<"$completions_request" \
+  | jq -r '.choices[0].message.content' | {
+    printf '\n\n%s\n\n' "$model_heading"
+    cat
+  } >>"$session_file"
 
 done
