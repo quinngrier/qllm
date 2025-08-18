@@ -198,7 +198,7 @@ while :; do
     vertex-gemini-2.5-pro \
   )
     # Listed in Google Cloud's web UI under Vertex AI > Model Garden.
-    model=publishers/google/models/${QLLM_MODEL#vertex-}
+    model=google/${QLLM_MODEL#vertex-}
     # TODO: Cache these
     bearer=$(gcloud auth print-access-token)
     project=$(gcloud config get-value project)
@@ -206,12 +206,12 @@ while :; do
     if [[ ${blah+x} ]]; then
       curl -L -S -f -s \
         -X POST \
-        --url "https://$location-aiplatform.googleapis.com/v1/projects/$project/locations/$location/$model:generateContent" \
+        --url "https://$location-aiplatform.googleapis.com/v1beta1/projects/$project/locations/$location/endpoints/openapi/chat/completions" \
         -H "Authorization: Bearer $bearer" \
         -H "Content-Type: application/json" \
         --data-binary @- \
         <<<"$blah" \
-      | jq -r '.candidates[0].content.parts[0].text' | {
+      | jq -r '.choices[0].message.content' | {
         printf '\n\n%s\n\n' "$model_heading"
         cat
       } >>"$session_file"
@@ -245,6 +245,7 @@ while :; do
     eval " $gawk"' \
       -v nl="$nl" \
       -v sq="$sq" \
+      -v model="$model" \
       -v system_prompt="$system_prompt" \
       -- \
       '\''
@@ -266,21 +267,22 @@ while :; do
           return r;
         }
 
-        function add_text(role, buffer,    p, c) {
+        function add_text(role, buffer,    p) {
           sub("^" nl "*", "", buffer);
           sub(nl "*$", "", buffer);
-          p = "{\"text\": " json_quote(buffer) "}";
-          c = "{\"role\": \"" role "\", \"parts\": [" p "]}";
-          if (contents) {
-            contents = contents ",";
+          p = "{\"type\": \"text\", \"text\": " json_quote(buffer) "}";
+          p = "{\"role\": \"" role "\", \"content\": [" p "]}";
+          if (messages) {
+            messages = messages ",";
           }
-          contents = contents c;
+          messages = messages p;
         }
 
         BEGIN {
           IGNORECASE = 1;
           role = "user";
           buffer = "";
+          add_text("system", system_prompt);
         }
 
         {
@@ -291,9 +293,9 @@ while :; do
               buffer = "";
             }
           } else if (/^@@@ *Model( .*)$/) {
-            if (role != "model") {
+            if (role != "assistant") {
               add_text(role, buffer);
-              role = "model";
+              role = "assistant";
               buffer = "";
             }
           } else {
@@ -303,13 +305,10 @@ while :; do
 
         END {
           add_text(role, buffer);
-          x = json_quote(system_prompt);
-          x = "{\"text\": " x "}";
-          x = "{\"parts\": [" x "]}";
           body = "{";
-          body = body "\"systemInstruction\": " x;
+          body = body "\"model\": " json_quote(model);
           body = body ", ";
-          body = body "\"contents\": [" contents "]"
+          body = body "\"messages\": [" messages "]"
           body = body "}";
           print body;
         }
