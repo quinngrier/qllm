@@ -8,13 +8,13 @@
 // <https://creativecommons.org/publicdomain/zero/1.0/>.
 //
 
-= Qllm
+= qllm
 :experimental:
 
 :x_download_url: https://raw.githubusercontent.com/quinngrier/qllm/main/qllm
 :x_man_page_url: https://github.com/quinngrier/qllm/blob/main/qllm.1.adoc
 
-Qllm is a large language model CLI wrapper.
+qllm is a large language model CLI wrapper.
 
 Here's how to get started:
 
