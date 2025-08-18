@@ -67,7 +67,7 @@ ifndef::x_manpage[]
 
 endif::[]
 
-:x_qllm_tagline: Work with large language models
+:x_qllm_tagline: Large language model CLI wrapper
 
 :x_subs_normal: attributes,specialchars,quotes,replacements,macros,post_replacements
 :x_subs_source: attributes,specialchars,quotes,macros
