@@ -250,9 +250,9 @@ while :; do
       -- \
       '\''
 
-        function json_quote(buffer,    c, r, s) {
+        function json_quote(x,    c, r, s) {
           c = "jq -R -s \".[:-1]\"";
-          print buffer |& c;
+          print x |& c;
           s = close(c, "to");
           if (s != 0) {
             print "\"" c "\" failed" >"/dev/stderr";
