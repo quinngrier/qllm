@@ -175,6 +175,12 @@ fi
 
 #-----------------------------------------------------------------------
 
+declare -A -r model_map=(
+  # Listed in Google Cloud's web UI under Vertex AI > Model Garden.
+  [vertex-gemini-2.5-flash]="google/gemini-2.5-flash"
+  [vertex-gemini-2.5-pro]="google/gemini-2.5-pro"
+)
+
 editor="${EDITOR-vi} ${EDITOR_BOTTOM-}"
 gawk=gawk
 
@@ -189,28 +195,28 @@ model_heading='@@@ Model '
 model_heading+=${blank_heading:${#model_heading}}
 readonly model_heading
 
-unset blah
+unset completions_request
 
 while :; do
+
+  model=${model_map[$QLLM_MODEL]}
 
   case $QLLM_MODEL in ( \
     vertex-gemini-2.5-flash | \
     vertex-gemini-2.5-pro \
   )
-    # Listed in Google Cloud's web UI under Vertex AI > Model Garden.
-    model=google/${QLLM_MODEL#vertex-}
     # TODO: Cache these
     bearer=$(gcloud auth print-access-token)
     project=$(gcloud config get-value project)
     location=us-central1
-    if [[ ${blah+x} ]]; then
+    if [[ ${completions_request+x} ]]; then
       curl -L -S -f -s \
         -X POST \
         --url "https://$location-aiplatform.googleapis.com/v1beta1/projects/$project/locations/$location/endpoints/openapi/chat/completions" \
         -H "Authorization: Bearer $bearer" \
         -H "Content-Type: application/json" \
         --data-binary @- \
-        <<<"$blah" \
+        <<<"$completions_request" \
       | jq -r '.choices[0].message.content' | {
         printf '\n\n%s\n\n' "$model_heading"
         cat
@@ -241,7 +247,7 @@ while :; do
     break
   fi
 
-  blah=$(
+  completions_request=$(
     eval " $gawk"' \
       -v argv0="$0" \
       -v model="$model" \
