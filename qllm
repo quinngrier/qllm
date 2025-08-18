@@ -52,6 +52,10 @@ fi
 # Parse the command-line arguments
 #-----------------------------------------------------------------------
 
+declare -A -r short_to_long=(
+  [-m]=--model
+)
+
 parse_options=1
 
 unset session_file
@@ -67,6 +71,55 @@ while (($# > 0)); do
     case $1 in --)
       parse_options=0
       shift
+      continue
+
+    #-------------------------------------------------------------------
+    # --model=<model>, -m <model>
+    #-------------------------------------------------------------------
+
+    ;; --model=*)
+      QLLM_MODEL=${1#*=}
+      shift
+      continue
+
+    #-------------------------------------------------------------------
+    # --foo bar to --foo=bar adjustments
+    #-------------------------------------------------------------------
+
+    ;; -- \
+      | --model \
+    )
+      if (($# < 2)); then
+        printf '%s\n' "$0: $1 requires an argument" >&2
+        exit 1
+      fi
+      x=$1=$2
+      shift 2
+      set -- "$x" "$@"
+      continue
+
+    #-------------------------------------------------------------------
+    # -f bar to --foo=bar adjustments
+    #-------------------------------------------------------------------
+
+    ;; -[m])
+      if (($# < 2)); then
+        printf '%s\n' "$0: $1 requires an argument" >&2
+        exit 1
+      fi
+      x=${short_to_long[$1]}=$2
+      shift 2
+      set -- "$x" "$@"
+      continue
+
+    #-------------------------------------------------------------------
+    # -fbar to --foo=bar adjustments
+    #-------------------------------------------------------------------
+
+    ;; -[m]?*)
+      x=${short_to_long[${1:0:2}]}=${1:2}
+      shift
+      set -- "$x" "$@"
       continue
 
     #-------------------------------------------------------------------
@@ -116,18 +169,14 @@ if [[ ! ${session_file+x} ]]; then
   session_file=default.qllm
 fi
 
+if [[ ! ${QLLM_MODEL+x} ]]; then
+  QLLM_MODEL=vertex-gemini-2.5-flash
+fi
+
 #-----------------------------------------------------------------------
 
 editor="${EDITOR-vi} ${EDITOR_BOTTOM-}"
 gawk=gawk
-
-bearer=$(gcloud auth print-access-token)
-project=$(gcloud config get-value project)
-location=us-central1
-
-# Listed in Google Cloud's web UI under Vertex AI > Model Garden.
-model=publishers/google/models/gemini-2.5-flash
-#model=publishers/google/models/gemini-2.5-pro
 
 printf -v blank_heading -- -%.s {1..72}
 readonly blank_heading
@@ -140,7 +189,38 @@ model_heading='@@@ Model '
 model_heading+=${blank_heading:${#model_heading}}
 readonly model_heading
 
+unset blah
+
 while :; do
+
+  case $QLLM_MODEL in ( \
+    vertex-gemini-2.5-flash | \
+    vertex-gemini-2.5-pro \
+  )
+    # Listed in Google Cloud's web UI under Vertex AI > Model Garden.
+    model=publishers/google/models/${QLLM_MODEL#vertex-}
+    # TODO: Cache these
+    bearer=$(gcloud auth print-access-token)
+    project=$(gcloud config get-value project)
+    location=us-central1
+    if [[ ${blah+x} ]]; then
+      curl -L -S -f -s \
+        -X POST \
+        --url "https://$location-aiplatform.googleapis.com/v1/projects/$project/locations/$location/$model:generateContent" \
+        -H "Authorization: Bearer $bearer" \
+        -H "Content-Type: application/json" \
+        --data-binary @- \
+        <<<"$blah" \
+      | jq -r '.candidates[0].content.parts[0].text' | {
+        printf '\n\n%s\n\n' "$model_heading"
+        cat
+      } >>"$session_file"
+    fi
+
+  ;; (*)
+    printf '%s\n' "$0: Unknown model: ${QLLM_MODEL@Q}" >&2
+    exit 1
+  esac
 
   if [[ -s "$session_file" ]]; then
     x=$(tail -n 3 -- "$session_file"; echo x)
@@ -238,17 +318,5 @@ while :; do
       "$session_file" \
     ;'
   )
-
-  curl -L -S -f -s \
-    -X POST \
-    --url "https://$location-aiplatform.googleapis.com/v1/projects/$project/locations/$location/$model:generateContent" \
-    -H "Authorization: Bearer $bearer" \
-    -H "Content-Type: application/json" \
-    --data-binary @- \
-    <<<"$blah" \
-  | jq -r '.candidates[0].content.parts[0].text' | {
-    printf '\n\n%s\n\n' "$model_heading"
-    cat
-  } >>"$session_file"
 
 done
