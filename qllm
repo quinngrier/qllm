@@ -243,9 +243,9 @@ while :; do
 
   blah=$(
     eval " $gawk"' \
+      -v model="$model" \
       -v nl="$nl" \
       -v sq="$sq" \
-      -v model="$model" \
       -v system_prompt="$system_prompt" \
       -- \
       '\''
