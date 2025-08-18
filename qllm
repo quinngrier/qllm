@@ -250,7 +250,7 @@ while :; do
       -- \
       '\''
 
-        function json_quote(x,    c, r, s) {
+        function json_quote(x,    c, s) {
           c = "jq -R -s \".[:-1]\"";
           print x |& c;
           s = close(c, "to");
@@ -258,13 +258,13 @@ while :; do
             print "\"" c "\" failed" >"/dev/stderr";
             exit 1;
           }
-          c |& getline r;
+          c |& getline x;
           s = close(c);
           if (s != 0) {
             print "\"" c "\" failed" >"/dev/stderr";
             exit 1;
           }
-          return r;
+          return x;
         }
 
         function add_text(role, buffer,    p) {
