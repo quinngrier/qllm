@@ -21,16 +21,105 @@ ifdef::x_manpage[]
 :manmanual: Qtts
 :mansource: Qtts
 
+:x_long_option_1a: pass:n[**--foo=**<__bar__>]
+:x_long_option_1b: pass:n[**--foo**{nbsp}<__bar__>]
+:x_opt_m_arg: pass:n[<__model__>]
+:x_opt_m_name: pass:n[**-m**]
+:x_opt_m_name_arg: pass:n[**-m**{nbsp}<__model__>]
+:x_opt_model_arg: pass:n[<__model__>]
+:x_opt_model_name: pass:n[**--model**]
+:x_opt_model_name_arg: pass:n[**--model=**<__model__>]
+:x_opt_terminator: pass:n[**--**]
+:x_qllm: pass:n[**qllm**]
+:x_qllm_option: pass:n[<__option__>]
+:x_qllm_session_file: pass:n[<__session_file__>]
+:x_short_option_1a: pass:n[**-f**{nbsp}<__bar__>]
+:x_short_option_1b: pass:n[**-f**<__bar__>]
+:x_short_option_2a: pass:n[**-f**]
+:x_short_option_2b: pass:n[**-g**]
+:x_short_option_2c: pass:n[**-fg**]
+:x_short_option_2d: pass:n[**-f{nbsp}-g**]
+
 endif::[]
 
 ifndef::x_manpage[]
 
 = `qllm`
 
+:x_long_option_1a: pass:n[``--foo=<bar>``]
+:x_long_option_1b: pass:n[``--foo{nbsp}<bar>``]
+:x_opt_m_arg: pass:n[``<model>``]
+:x_opt_m_name: pass:n[``-m``]
+:x_opt_m_name_arg: pass:n[``-m{nbsp}<model>``]
+:x_opt_model_arg: pass:n[``<model>``]
+:x_opt_model_name: pass:n[``--model``]
+:x_opt_model_name_arg: pass:n[``--model=<model>``]
+:x_opt_terminator: pass:n[``--``]
+:x_qllm: pass:n[``qllm``]
+:x_qllm_option: pass:n[``<option>``]
+:x_qllm_session_file: pass:n[``<session_file>``]
+:x_short_option_1a: pass:n[``-f{nbsp}<bar>``]
+:x_short_option_1b: pass:n[``-f<bar>``]
+:x_short_option_2a: pass:n[``-f``]
+:x_short_option_2b: pass:n[``-g``]
+:x_short_option_2c: pass:n[``-fg``]
+:x_short_option_2d: pass:n[``-f{nbsp}-g``]
+
 endif::[]
+
+:x_qllm_tagline: Work with large language models
 
 :x_subs_normal: attributes,specialchars,quotes,replacements,macros,post_replacements
 :x_subs_source: attributes,specialchars,quotes,macros
+
+== Name
+
+ifdef::x_manpage[]
+qllm - {x_qllm_tagline}
+endif::[]
+
+ifndef::x_manpage[]
+{x_qllm} &#x2014; {x_qllm_tagline}
+endif::[]
+
+== Synopsis
+
+ifdef::x_manpage[]
+{x_qllm} ++[++{x_qllm_option}++...]++ ++[++{x_qllm_session_file}++]++
+endif::[]
+
+ifndef::x_manpage[]
+----
+qllm [<option>...] [<session_file>]
+----
+endif::[]
+
+== Description
+
+TODO
+
+== Options
+
+A long option with a required argument {x_long_option_1a} may also be
+written as {x_long_option_1b}.
+A short option with a required argument {x_short_option_1a} may also be
+written as {x_short_option_1b} if the argument is not empty.
+A short option with a forbidden argument {x_short_option_2a} may be
+bundled with a subsequent short option or short option bundle
+{x_short_option_2b} by writing {x_short_option_2c} instead of
+{x_short_option_2d}.
+
+{x_opt_terminator}:: All further arguments will be taken as operands
+instead of possibly being taken as {x_qtts_option}s.
+
+{x_opt_model_name_arg}, {x_opt_m_name_arg}:: Use {x_opt_model_arg}
+instead of the default model.
+
+== Environment variables
+
+TODO
+
+== Examples
 
 TODO
 
