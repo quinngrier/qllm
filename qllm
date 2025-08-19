@@ -217,7 +217,12 @@ readonly model_heading
 
 while :; do
 
-  model=${model_map[$QLLM_MODEL]}
+  model=${model_map[$QLLM_MODEL]-}
+  if [[ ! $model ]]; then
+    printf '%s\n' "$0: Unknown model: ${QLLM_MODEL@Q}" >&2
+    exit 1
+  fi
+
   ${init_functions[$QLLM_MODEL]}
 
   if [[ -s "$session_file" ]]; then
