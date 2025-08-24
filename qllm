@@ -215,6 +215,81 @@ model_heading='@@@ model '
 model_heading+=${blank_heading:${#model_heading}}
 readonly model_heading
 
+#-----------------------------------------------------------------------
+
+declare -r qllm_to_completions_gawk='
+
+  function json_quote(x,    c, s) {
+    c = "jq -R -s \".[:-1]\"";
+    print x |& c;
+    s = close(c, "to");
+    if (s != 0) {
+      print argv0 ": \"" c "\" failed" >"/dev/stderr";
+      exit_status = 1;
+      exit exit_status;
+    }
+    c |& getline x;
+    s = close(c);
+    if (s != 0) {
+      print argv0 ": \"" c "\" failed" >"/dev/stderr";
+      exit_status = 1;
+      exit exit_status;
+    }
+    return x;
+  }
+
+  function add_text(role, buffer,    p) {
+    sub("^" nl "*", "", buffer);
+    sub(nl "*$", "", buffer);
+    p = "{\"type\": \"text\", \"text\": " json_quote(buffer) "}";
+    p = "{\"role\": \"" role "\", \"content\": [" p "]}";
+    if (messages) {
+      messages = messages ",";
+    }
+    messages = messages p;
+  }
+
+  BEGIN {
+    role = "user";
+    buffer = "";
+    add_text("system", system_prompt);
+  }
+
+  {
+    if (/^@@@ *user( .*)$/) {
+      if (role != "user") {
+        add_text(role, buffer);
+        role = "user";
+        buffer = "";
+      }
+    } else if (/^@@@ *model( .*)$/) {
+      if (role != "assistant") {
+        add_text(role, buffer);
+        role = "assistant";
+        buffer = "";
+      }
+    } else {
+      buffer = buffer "\n" $0;
+    }
+  }
+
+  END {
+    if (exit_status) {
+      exit exit_status;
+    }
+    add_text(role, buffer);
+    body = "{";
+    body = body "\"model\": " json_quote(model);
+    body = body ", ";
+    body = body "\"messages\": [" messages "]"
+    body = body "}";
+    print body;
+  }
+
+'
+
+#-----------------------------------------------------------------------
+
 while :; do
 
   model=${model_map[$QLLM_MODEL]-}
@@ -252,76 +327,7 @@ while :; do
       -v sq="$sq" \
       -v system_prompt="$system_prompt" \
       -- \
-      '\''
-
-        function json_quote(x,    c, s) {
-          c = "jq -R -s \".[:-1]\"";
-          print x |& c;
-          s = close(c, "to");
-          if (s != 0) {
-            print argv0 ": \"" c "\" failed" >"/dev/stderr";
-            exit_status = 1;
-            exit exit_status;
-          }
-          c |& getline x;
-          s = close(c);
-          if (s != 0) {
-            print argv0 ": \"" c "\" failed" >"/dev/stderr";
-            exit_status = 1;
-            exit exit_status;
-          }
-          return x;
-        }
-
-        function add_text(role, buffer,    p) {
-          sub("^" nl "*", "", buffer);
-          sub(nl "*$", "", buffer);
-          p = "{\"type\": \"text\", \"text\": " json_quote(buffer) "}";
-          p = "{\"role\": \"" role "\", \"content\": [" p "]}";
-          if (messages) {
-            messages = messages ",";
-          }
-          messages = messages p;
-        }
-
-        BEGIN {
-          role = "user";
-          buffer = "";
-          add_text("system", system_prompt);
-        }
-
-        {
-          if (/^@@@ *user( .*)$/) {
-            if (role != "user") {
-              add_text(role, buffer);
-              role = "user";
-              buffer = "";
-            }
-          } else if (/^@@@ *model( .*)$/) {
-            if (role != "assistant") {
-              add_text(role, buffer);
-              role = "assistant";
-              buffer = "";
-            }
-          } else {
-            buffer = buffer "\n" $0;
-          }
-        }
-
-        END {
-          if (exit_status) {
-            exit exit_status;
-          }
-          add_text(role, buffer);
-          body = "{";
-          body = body "\"model\": " json_quote(model);
-          body = body ", ";
-          body = body "\"messages\": [" messages "]"
-          body = body "}";
-          print body;
-        }
-
-      '\'' \
+      '"'$qllm_to_completions_gawk'"' \
       "$session_file" \
     ;'
   )
