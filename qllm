@@ -268,6 +268,12 @@ declare -r qllm_to_completions_gawk='
         role = "assistant";
         buffer = "";
       }
+    } else if (role == "user") {
+      if (sub(/^@@@ *<< */, "")) {
+        # TODO: heredoc
+      } else {
+        buffer = buffer "\n" $0;
+      }
     } else {
       buffer = buffer "\n" $0;
     }
