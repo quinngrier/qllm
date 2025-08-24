@@ -53,6 +53,7 @@ fi
 #-----------------------------------------------------------------------
 
 declare -A -r short_to_long=(
+  [-d]=--debug
   [-m]=--model
 )
 
@@ -70,6 +71,15 @@ while (($# > 0)); do
 
     case $1 in (--)
       parse_options=0
+      shift
+      continue
+
+    #-------------------------------------------------------------------
+    # --debug, -d
+    #-------------------------------------------------------------------
+
+    ;; (--debug)
+      QLLM_DEBUG=
       shift
       continue
 
@@ -120,6 +130,27 @@ while (($# > 0)); do
       x=${short_to_long[${1:0:2}]}=${1:2}
       shift
       set -- "$x" "$@"
+      continue
+
+    #-------------------------------------------------------------------
+    # Short options with forbidden arguments: -f to --foo
+    #-------------------------------------------------------------------
+
+    ;; (-[d])
+      x=${short_to_long[$1]}
+      shift
+      set -- "$x" "$@"
+      continue
+
+    #-------------------------------------------------------------------
+    # Short options with forbidden arguments: -fbar to --foo -bar
+    #-------------------------------------------------------------------
+
+    ;; (-[d]?*)
+      x=${short_to_long[${1:0:2}]}
+      y=-${1:2}
+      shift
+      set -- "$x" "$y" "$@"
       continue
 
     #-------------------------------------------------------------------
@@ -344,6 +375,15 @@ while :; do
       "$session_file" \
     ;'
   )
+
+  if [[ ${QLLM_DEBUG+x} ]]; then
+
+    printf 'completions_request = %s\n' "$completions_request" >&2
+
+    x=$(jq . <<<"$completions_request" 2>&1 || :)
+    printf 'parsed_completions_request = %s\n' "$x" >&2
+
+  fi
 
   curl -L -S -f -s \
     -X POST \
