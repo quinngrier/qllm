@@ -256,13 +256,13 @@ declare -r qllm_to_completions_gawk='
   }
 
   {
-    if (/^@@@ *user( .*)$/) {
+    if (/^@@@ *user( .*)?$/) {
       if (role != "user") {
         add_text(role, buffer);
         role = "user";
         buffer = "";
       }
-    } else if (/^@@@ *model( .*)$/) {
+    } else if (/^@@@ *model( .*)?$/) {
       if (role != "assistant") {
         add_text(role, buffer);
         role = "assistant";
