@@ -250,23 +250,26 @@ readonly model_heading
 
 declare -r qllm_to_completions_gawk='
 
-  function json_quote(x,    c, s) {
-    c = "jq -R -s \".[:-1]\"";
-    print x |& c;
+  function command_filter(x, c,    s) {
+    printf("%s", x) |& c;
     s = close(c, "to");
     if (s != 0) {
-      print argv0 ": \"" c "\" failed" >"/dev/stderr";
+      print(argv0 ": Command failed: " c) >"/dev/stderr";
       exit_status = 1;
       exit exit_status;
     }
     c |& getline x;
     s = close(c);
     if (s != 0) {
-      print argv0 ": \"" c "\" failed" >"/dev/stderr";
+      print(argv0 ": Command failed: " c) >"/dev/stderr";
       exit_status = 1;
       exit exit_status;
     }
     return x;
+  }
+
+  function json_quote(x) {
+    return command_filter(x, "jq -R -s .");
   }
 
   function add_text_content(x) {
