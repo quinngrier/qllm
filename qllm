@@ -83,7 +83,7 @@ while (($# > 0)); do
       continue
 
     #-------------------------------------------------------------------
-    # --foo bar to --foo=bar adjustments
+    # Long options with required arguments: --foo bar to --foo=bar
     #-------------------------------------------------------------------
 
     ;; ( \
@@ -99,7 +99,7 @@ while (($# > 0)); do
       continue
 
     #-------------------------------------------------------------------
-    # -f bar to --foo=bar adjustments
+    # Short options with required arguments: -f bar to --foo=bar
     #-------------------------------------------------------------------
 
     ;; (-[m])
@@ -113,7 +113,7 @@ while (($# > 0)); do
       continue
 
     #-------------------------------------------------------------------
-    # -fbar to --foo=bar adjustments
+    # Short options with required arguments: -fbar to --foo=bar
     #-------------------------------------------------------------------
 
     ;; (-[m]?*)
