@@ -272,6 +272,10 @@ declare -r qllm_to_completions_gawk='
     return command_filter(x, "jq -R -s .");
   }
 
+  function base64_encode(x) {
+    return command_filter(x, "base64");
+  }
+
   function add_text_content(x) {
     sub("^[" nl " ]*", "", x);
     sub("[" nl " ]*$", "", x);
