@@ -274,7 +274,8 @@ declare -r qllm_to_completions_gawk='
     sub("[" nl " ]*$", "", x);
     if (!x) return;
     if (content) content = content ", ";
-    content = content "{\"type\": \"text\", \"text\": " json_quote(x) "}";
+    x = json_quote(x);
+    content = content "{\"type\": \"text\", \"text\": " x "}";
   }
 
   function add_text(role, buffer,    p) {
