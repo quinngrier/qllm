@@ -121,6 +121,47 @@ instead of possibly being taken as {x_qtts_option}s.
 {x_opt_model_name_arg}, {x_opt_m_name_arg}:: Use {x_opt_model_arg}
 instead of the default model.
 
+== Heredocs
+
+Text files can be added inline using heredocs:
+
+----
+Explain this program and show me how to compile and run it.
+
+@@@<< main.c
+#include <stdio.h>
+int main(void) {
+  puts("Hello, qllm!");
+  return 0;
+}
+@@@<<
+----
+
+A heredoc begins with a `@@@<<` directive with a filename, and ends with
+a `@@@<<` directive with no filename.
+
+Intermediate ending directives can be omitted when defining multiple
+heredocs in a row:
+
+----
+Explain this program and show me how to compile and run it.
+
+@@@<< hello_qllm.h
+void hello_qllm(void);
+@@@<< hello_qllm.c
+#include <stdio.h>
+void hello_qllm(void) {
+  puts("Hello, qllm!");
+}
+@@@<< main.c
+#include "hello_qllm.h"
+int main(void) {
+  hello_qllm();
+  return 0;
+}
+@@@<<
+----
+
 == Environment variables
 
 TODO

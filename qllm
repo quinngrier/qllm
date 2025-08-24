@@ -276,18 +276,35 @@ declare -r qllm_to_completions_gawk='
     return command_filter(x, "base64");
   }
 
-  function add_text_content(x) {
-    sub("^[" nl " ]*", "", x);
-    sub("[" nl " ]*$", "", x);
-    if (!x) {
-      return;
+  function get_fence_type(filename) {
+    if (filename ~ /\.[ch]$/) {
+      return "c";
     }
+    return "";
+  }
+
+  function add_text_content(x,    y) {
+    if (heredoc) {
+      if (x) {
+        x = x "\n";
+      }
+      y = "Here is the file `" heredoc "`:\n\n";
+      x = y "```" get_fence_type(heredoc) "\n" x "```";
+      heredoc = "";
+    } else {
+      sub("^[" nl " ]*", "", x);
+      sub("[" nl " ]*$", "", x);
+      if (!x) {
+        return;
+      }
+    }
+    x = json_quote(x);
     if (content) {
       content = content ", ";
     }
     content = content "{";
     content = content "\"type\": \"text\", ";
-    content = content "\"text\": " json_quote(x);
+    content = content "\"text\": " x;
     content = content "}";
   }
 
@@ -330,12 +347,23 @@ declare -r qllm_to_completions_gawk='
       }
     } else if (role == "user") {
       if (sub(/^@@@ *<< */, "")) {
-        # TODO: heredoc
+        sub(/ *$/, "");
+        if (heredoc || $0) {
+          add_text_content(buffer);
+          buffer = "";
+        }
+        heredoc = $0;
       } else {
-        buffer = buffer "\n" $0;
+        if (buffer) {
+          buffer = buffer "\n";
+        }
+        buffer = buffer $0;
       }
     } else {
-      buffer = buffer "\n" $0;
+      if (buffer) {
+        buffer = buffer "\n";
+      }
+      buffer = buffer $0;
     }
   }
 
