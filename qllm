@@ -285,12 +285,17 @@ declare -r qllm_to_completions_gawk='
   }
 
   function add_message(role) {
+    if (content) {
+      content = "[" content "]";
+    } else {
+      content = "\" \"";
+    }
     if (messages) {
       messages = messages ", ";
     }
     messages = messages "{";
     messages = messages "\"role\": \"" role "\", ";
-    messages = messages "\"content\": [" content "]";
+    messages = messages "\"content\": " content;
     messages = messages "}";
     content = "";
   }
