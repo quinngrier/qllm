@@ -18,8 +18,8 @@ ifdef::x_manpage[]
 
 = qllm(1)
 :doctype: manpage
-:manmanual: Qtts
-:mansource: Qtts
+:manmanual: qllm
+:mansource: qllm
 
 :x_long_option_1a: pass:n[**--foo=**<__bar__>]
 :x_long_option_1b: pass:n[**--foo**{nbsp}<__bar__>]
@@ -114,7 +114,7 @@ bundled with a subsequent short option or short option bundle
 {x_short_option_2d}.
 
 {x_opt_terminator}:: All further arguments will be taken as operands
-instead of possibly being taken as {x_qtts_option}s.
+instead of possibly being taken as {x_qllm_option}s.
 
 {x_opt_debug_name}, {x_opt_d_name}:: Print debug information to stderr.
 
