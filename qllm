@@ -278,34 +278,35 @@ declare -r qllm_to_completions_gawk='
     content = content "{\"type\": \"text\", \"text\": " x "}";
   }
 
-  function add_text(role, buffer,    p) {
-    sub("^" nl "*", "", buffer);
-    sub(nl "*$", "", buffer);
-    content = "";
-    add_text_content(buffer);
-    p = "{\"role\": \"" role "\", \"content\": [" content "]}";
+  function add_message(role) {
     if (messages) {
-      messages = messages ",";
+      messages = messages ", ";
     }
-    messages = messages p;
+    messages = messages "{";
+    messages = messages "\"role\": \"" role "\", ";
+    messages = messages "\"content\": [" content "]";
+    messages = messages "}";
+    content = "";
   }
 
   BEGIN {
+    add_text_content(system_prompt);
+    add_message("system");
     role = "user";
-    buffer = "";
-    add_text("system", system_prompt);
   }
 
   {
     if (/^@@@ *user( .*)?$/) {
       if (role == "assistant") {
-        add_text(role, buffer);
+        add_text_content(buffer);
+        add_message(role);
         role = "user";
         buffer = "";
       }
     } else if (/^@@@ *model( .*)?$/) {
       if (role == "user") {
-        add_text(role, buffer);
+        add_text_content(buffer);
+        add_message(role);
         role = "assistant";
         buffer = "";
       }
@@ -324,7 +325,8 @@ declare -r qllm_to_completions_gawk='
     if (exit_status) {
       exit exit_status;
     }
-    add_text(role, buffer);
+    add_text_content(buffer);
+    add_message(role);
     body = "{";
     body = body "\"model\": " json_quote(model);
     body = body ", ";
