@@ -140,8 +140,8 @@ int main(void) {
 A heredoc begins with a `@@@<<` directive with a filename, and ends with
 a `@@@<<` directive with no filename.
 
-Intermediate ending directives can be omitted when defining multiple
-heredocs in a row:
+Intermediate heredoc ending directives can be omitted when defining
+multiple heredocs in a row:
 
 ----
 Explain this program and show me how to compile and run it.
