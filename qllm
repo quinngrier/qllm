@@ -272,10 +272,16 @@ declare -r qllm_to_completions_gawk='
   function add_text_content(x) {
     sub("^[" nl " ]*", "", x);
     sub("[" nl " ]*$", "", x);
-    if (!x) return;
-    if (content) content = content ", ";
-    x = json_quote(x);
-    content = content "{\"type\": \"text\", \"text\": " x "}";
+    if (!x) {
+      return;
+    }
+    if (content) {
+      content = content ", ";
+    }
+    content = content "{";
+    content = content "\"type\": \"text\", ";
+    content = content "\"text\": " json_quote(x);
+    content = content "}";
   }
 
   function add_message(role) {
