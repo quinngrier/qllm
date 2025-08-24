@@ -285,7 +285,6 @@ while :; do
         }
 
         BEGIN {
-          IGNORECASE = 1;
           role = "user";
           buffer = "";
           add_text("system", system_prompt);
