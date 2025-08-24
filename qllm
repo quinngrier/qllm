@@ -207,11 +207,11 @@ gawk=gawk
 printf -v blank_heading -- -%.s {1..72}
 readonly blank_heading
 
-user_heading='@@@ User '
+user_heading='@@@ user '
 user_heading+=${blank_heading:${#user_heading}}
 readonly user_heading
 
-model_heading='@@@ Model '
+model_heading='@@@ model '
 model_heading+=${blank_heading:${#model_heading}}
 readonly model_heading
 
@@ -292,13 +292,13 @@ while :; do
         }
 
         {
-          if (/^@@@ *User( .*)$/) {
+          if (/^@@@ *user( .*)$/) {
             if (role != "user") {
               add_text(role, buffer);
               role = "user";
               buffer = "";
             }
-          } else if (/^@@@ *Model( .*)$/) {
+          } else if (/^@@@ *model( .*)$/) {
             if (role != "assistant") {
               add_text(role, buffer);
               role = "assistant";
