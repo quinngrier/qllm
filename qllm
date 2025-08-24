@@ -371,7 +371,7 @@ while :; do
       -v sq="$sq" \
       -v system_prompt="$system_prompt" \
       -- \
-      '"'$qllm_to_completions_gawk'"' \
+      "$qllm_to_completions_gawk" \
       "$session_file" \
     ;'
   )
