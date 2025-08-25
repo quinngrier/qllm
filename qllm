@@ -353,6 +353,10 @@ declare -r qllm_to_completions_gawk='
           buffer = "";
         }
         heredoc = $0;
+      } else if (/^@@@/) {
+        print(argv0 ": Unknown directive: " $0) >"/dev/stderr";
+        exit_status = 1;
+        exit exit_status;
       } else {
         if (buffer) {
           buffer = buffer "\n";
@@ -360,6 +364,11 @@ declare -r qllm_to_completions_gawk='
         buffer = buffer $0;
       }
     } else {
+      if (/^@@@/) {
+        print(argv0 ": Unknown directive: " $0) >"/dev/stderr";
+        exit_status = 1;
+        exit exit_status;
+      }
       if (buffer) {
         buffer = buffer "\n";
       }
