@@ -250,20 +250,22 @@ readonly model_heading
 
 declare -r qllm_to_completions_gawk='
 
+  function barf(message) {
+    print(argv0 ": " message) >"/dev/stderr";
+    exit_status = 1;
+    exit exit_status;
+  }
+
   function command_filter(x, c,    s) {
     printf("%s", x) |& c;
     s = close(c, "to");
     if (s != 0) {
-      print(argv0 ": Command failed: " c) >"/dev/stderr";
-      exit_status = 1;
-      exit exit_status;
+      barf("Command failed: " c);
     }
     c |& getline x;
     s = close(c);
     if (s != 0) {
-      print(argv0 ": Command failed: " c) >"/dev/stderr";
-      exit_status = 1;
-      exit exit_status;
+      barf("Command failed: " c);
     }
     return x;
   }
@@ -354,9 +356,7 @@ declare -r qllm_to_completions_gawk='
         }
         heredoc = $0;
       } else if (/^@@@/) {
-        print(argv0 ": Unknown directive: " $0) >"/dev/stderr";
-        exit_status = 1;
-        exit exit_status;
+        barf("Unknown directive: " $0);
       } else {
         if (buffer) {
           buffer = buffer "\n";
@@ -365,9 +365,7 @@ declare -r qllm_to_completions_gawk='
       }
     } else {
       if (/^@@@/) {
-        print(argv0 ": Unknown directive: " $0) >"/dev/stderr";
-        exit_status = 1;
-        exit exit_status;
+        barf("Unknown directive: " $0);
       }
       if (buffer) {
         buffer = buffer "\n";
