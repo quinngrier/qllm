@@ -331,14 +331,14 @@ declare -r qllm_to_completions_gawk='
   }
 
   {
-    if (/^@@@ *user( .*)?$/) {
+    if (/^@@@ *user[ -]*$/) {
       if (role == "assistant") {
         add_text_content(buffer);
         add_message(role);
         role = "user";
         buffer = "";
       }
-    } else if (/^@@@ *model( .*)?$/) {
+    } else if (/^@@@ *model[ -]*$/) {
       if (role == "user") {
         add_text_content(buffer);
         add_message(role);
