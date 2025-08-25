@@ -294,8 +294,8 @@ declare -r qllm_to_completions_gawk='
       x = y "```" get_fence_type(heredoc) "\n" x "```";
       heredoc = "";
     } else {
-      sub("^[" nl " ]*", "", x);
-      sub("[" nl " ]*$", "", x);
+      sub("^[\n ]*", "", x);
+      sub("[\n ]*$", "", x);
       if (!x) {
         return;
       }
@@ -425,7 +425,6 @@ while :; do
     eval " $gawk"' \
       -v argv0="$0" \
       -v model="$model" \
-      -v nl="$nl" \
       -v sq="$sq" \
       -v system_prompt="$system_prompt" \
       -- \
