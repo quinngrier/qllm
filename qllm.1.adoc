@@ -121,6 +121,16 @@ instead of possibly being taken as {x_qllm_option}s.
 {x_opt_model_name_arg}, {x_opt_m_name_arg}:: Use {x_opt_model_arg}
 instead of the default model.
 
+== Text file inputs
+
+Text files can be added using the `@@@<` directive:
+
+----
+Explain this program and show me how to compile it.
+
+@@@< main.c
+----
+
 == Heredocs
 
 Text files can be added inline using heredocs:
