@@ -388,6 +388,7 @@ declare -r qllm_to_completions_gawk='
         heredoc = $0;
         buffer = read_text_file(heredoc);
         add_text_content(buffer);
+        buffer = "";
       } else if (/^@@@/) {
         barf("Unknown directive: " $0);
       } else {
