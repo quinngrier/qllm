@@ -370,10 +370,11 @@ declare -r qllm_to_completions_gawk='
     } else if (role == "user") {
       if (sub(/^@@@ *<< */, "")) {
         sub(/ *$/, "");
-        if (heredoc || $0) {
-          add_text_content(buffer);
-          buffer = "";
+        if (!$0 && !heredoc) {
+          barf("Orphan @@@<< block terminator");
         }
+        add_text_content(buffer);
+        buffer = "";
         heredoc = $0;
       } else if (sub(/^@@@ *< */, "")) {
         sub(/ *$/, "");
