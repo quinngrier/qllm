@@ -131,9 +131,9 @@ Explain this program and show me how to compile it.
 @@@< main.c
 ----
 
-== Heredocs
+== Inline text file inputs
 
-Text files can be added inline using heredocs:
+Text files can be added inline using the `@@@<<` directive:
 
 ----
 Explain this program and show me how to compile and run it.
@@ -147,11 +147,8 @@ int main(void) {
 @@@<<
 ----
 
-A heredoc begins with a `@@@<<` directive with a filename, and ends with
-a `@@@<<` directive with no filename.
-
-Intermediate heredoc ending directives can be omitted when defining
-multiple heredocs in a row:
+Intermediate ending directives can be omitted when defining multiple
+inline text file inputs in a row:
 
 ----
 Explain this program and show me how to compile and run it.
