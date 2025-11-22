@@ -399,13 +399,13 @@ declare -r qllm_to_completions_gawk='
   }
 
   {
-    if (/^@@@ *user[ -]*$/) {
+    if ($0 ~ /^@@@ *user[ -]*$/) {
       if (role == "assistant") {
         add_text_content();
         add_message(role);
         role = "user";
       }
-    } else if (/^@@@ *model[ -]*$/) {
+    } else if ($0 ~ /^@@@ *model[ -]*$/) {
       if (role == "user") {
         add_text_content();
         add_message(role);
@@ -432,7 +432,7 @@ declare -r qllm_to_completions_gawk='
         heredoc = z;
         buffer = read_text_file(heredoc);
         add_text_content();
-      } else if (/^@@@/) {
+      } else if ($0 ~ /^@@@/) {
         barf("Unknown directive: " $0);
       } else {
         if (buffer) {
@@ -441,7 +441,7 @@ declare -r qllm_to_completions_gawk='
         buffer = buffer $0;
       }
     } else {
-      if (/^@@@/) {
+      if ($0 ~ /^@@@/) {
         barf("Unknown directive: " $0);
       }
       if (buffer) {
