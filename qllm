@@ -507,12 +507,9 @@ while :; do
   )
 
   if [[ ${QLLM_DEBUG+x} ]]; then
-
     printf 'completions_request = %s\n' "$completions_request" >&2
-
     x=$(jq . <<<"$completions_request" 2>&1 || :)
     printf 'parsed_completions_request = %s\n' "$x" >&2
-
   fi
 
   completions_response=$(
@@ -527,12 +524,9 @@ while :; do
   )
 
   if [[ ${QLLM_DEBUG+x} ]]; then
-
     printf 'completions_response = %s\n' "$completions_response" >&2
-
     x=$(jq . <<<"$completions_response" 2>&1 || :)
     printf 'parsed_completions_response = %s\n' "$x" >&2
-
   fi
 
   jq -r '.choices[0].message.content' <<<"$completions_response" | {
