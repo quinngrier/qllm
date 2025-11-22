@@ -147,8 +147,8 @@ int main(void) {
 @@@<<
 ----
 
-Intermediate ending directives can be omitted when defining multiple
-inline text file inputs in a row:
+When defining multiple inline text file inputs in a row, the
+intermediate ending directives can be omitted:
 
 ----
 Explain this program and show me how to compile and run it.
