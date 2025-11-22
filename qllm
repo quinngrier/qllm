@@ -13,6 +13,15 @@
 set -E -e -u -o pipefail || exit $?
 trap exit ERR
 
+#-----------------------------------------------------------------------
+# search_up <&r> <p>
+#-----------------------------------------------------------------------
+#
+# Starting from the current directory, search up the directory tree for
+# the path <p> to exist. If found, set <&r> to an absolute path to the
+# first such existent result. Otherwise, set <&r> to be empty.
+#
+
 search_up() {
   local -n search_up__r=$1
   local search_up__d="$PWD"
