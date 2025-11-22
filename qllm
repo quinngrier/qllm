@@ -39,7 +39,7 @@ search_up() {
 # search_up_or_home <&r> <p>
 #-----------------------------------------------------------------------
 #
-# Like search_up(), but also search $HOME at the end.
+# Like search_up(), but also search $HOME at the end, if needed.
 #
 
 search_up_or_home() {
