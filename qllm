@@ -371,6 +371,28 @@ declare -r qllm_to_completions_gawk='
     add_text_content();
     add_message("system");
     role = "user";
+
+    tools = "{";
+    tools = tools "\"type\": \"function\", ";
+    tools = tools "\"function\": {";
+    tools = tools "\"name\": \"write_text_file\", ";
+    tools = tools "\"description\": \"Create or overwrite a text file with the given content.\", ";
+    tools = tools "\"parameters\": {";
+    tools = tools "\"type\": \"object\", ";
+    tools = tools "\"properties\": {";
+    tools = tools "\"path\": {";
+    tools = tools "\"type\": \"string\",";
+    tools = tools "\"description\": \"A path to the text file to create or overwrite.\"";
+    tools = tools "},";
+    tools = tools "\"content\": {";
+    tools = tools "\"type\": \"string\",";
+    tools = tools "\"description\": \"The content to write to the text file.\"";
+    tools = tools "}";
+    tools = tools "},";
+    tools = tools "\"required\": [\"path\", \"content\"]";
+    tools = tools "}";
+    tools = tools "}";
+    tools = tools "}";
   }
 
   {
