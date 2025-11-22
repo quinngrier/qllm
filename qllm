@@ -35,6 +35,13 @@ search_up() {
   search_up__r=
 }; readonly -f search_up
 
+#-----------------------------------------------------------------------
+# search_up_or_home <&r> <p>
+#-----------------------------------------------------------------------
+#
+# Like search_up(), but also search $HOME at the end.
+#
+
 search_up_or_home() {
   local -n search_up_or_home__r=$1
   search_up search_up_or_home__r "$2"
@@ -42,6 +49,8 @@ search_up_or_home() {
     search_up_or_home__r=$HOME/$2
   fi
 }; readonly -f search_up_or_home
+
+#-----------------------------------------------------------------------
 
 declare -r \
   default_system_prompt="You and the user are experts. Keep your answers short. Don't show any personality." \
