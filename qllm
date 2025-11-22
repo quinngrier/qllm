@@ -219,6 +219,9 @@ if [[ ! ${session_file+x} ]]; then
   session_file=default.qllm
 fi
 
+session_file_new=$session_file.new
+readonly session_file_new
+
 if [[ ! ${QLLM_MODEL+x} ]]; then
   QLLM_MODEL=vertex-gemini-2.5-flash
 fi
@@ -409,23 +412,24 @@ declare -r qllm_to_completions_gawk='
         role = "assistant";
       }
     } else if (role == "user") {
-      if (sub(/^@@@ *<< */, "")) {
-        sub(/ *$/, "");
-        if (!$0 && !heredoc) {
+      z = $0;
+      if (sub(/^@@@ *<< */, "", z)) {
+        sub(/ *$/, "", z);
+        if (!z && !heredoc) {
           barf("Orphan @@@<< block terminator");
         }
         add_text_content();
-        heredoc = $0;
-      } else if (sub(/^@@@ *< */, "")) {
-        sub(/ *$/, "");
-        if (!$0) {
+        heredoc = z;
+      } else if (sub(/^@@@ *< */, "", z)) {
+        sub(/ *$/, "", z);
+        if (!z) {
           barf("The @@@< directive requires a filename");
         }
         if (heredoc) {
           barf("The @@@< directive cannot be used in a @@@<< block");
         }
         add_text_content();
-        heredoc = $0;
+        heredoc = z;
         buffer = read_text_file(heredoc);
         add_text_content();
       } else if (/^@@@/) {
@@ -445,6 +449,7 @@ declare -r qllm_to_completions_gawk='
       }
       buffer = buffer $0;
     }
+    print $0 > session_file_new;
   }
 
   END {
@@ -498,6 +503,7 @@ while :; do
     eval " $gawk"' \
       -v argv0="$0" \
       -v model="$model" \
+      -v session_file_new="$session_file_new" \
       -v sq="$sq" \
       -v system_prompt="$system_prompt" \
       -- \
@@ -505,6 +511,8 @@ while :; do
       "$session_file" \
     ;'
   )
+
+  mv -f -- "$session_file_new" "$session_file"
 
   if [[ ${QLLM_DEBUG+x} ]]; then
     printf 'completions_request = %s\n' "$completions_request" >&2
