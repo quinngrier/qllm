@@ -434,7 +434,8 @@ declare -r qllm_to_completions_gawk='
     body = "{";
     body = body "\"model\": " json_quote(model);
     body = body ", ";
-    body = body "\"messages\": [" messages "]"
+    body = body "\"messages\": [" messages "], ";
+    body = body "\"tools\": [" tools "]";
     body = body "}";
     print body;
   }
