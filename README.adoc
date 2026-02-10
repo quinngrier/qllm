@@ -43,11 +43,10 @@ it in your `PATH`.
 . Set your `VISUAL` environment variable to your desired text editor.
 For example, `export VISUAL=vim`.
 
-. Optionally set your `VISUAL_BOTTOM` environment variable to the CLI
-arguments needed to make your editor scroll to the last line when
-opening a file.
-For example, `export VISUAL_BOTTOM=+` or
-`export VISUAL_BOTTOM='-c "normal G"'` will work for Vim.
+. Optionally set your `VISUAL_BOTTOM` environment variable to the
+arguments to pass to your text editor to make it scroll to the bottom
+when opening a file.
+For example, you can use `export VISUAL_BOTTOM=+` for Vim.
 
 . If you plan to use Vertex AI:
 
@@ -56,8 +55,8 @@ For example, `export VISUAL_BOTTOM=+` or
 output the right things.
 
 . Run `qllm` to start or resume a chat session in `default.qllm`.
-Wait for your editor to open, type your input at the bottom, save the
-file and close your editor, and repeat.
+Wait for your text editor to open, type your input at the bottom, save
+the file and close your editor, and repeat.
 When you want to quit, close your editor without making any changes
 (which is checked via hashing, not last-modified time).
 
