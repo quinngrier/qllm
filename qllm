@@ -260,7 +260,38 @@ declare -A -r init_functions=(
   [vertex-gemini-3-pro-preview]=vertex_init
 )
 
-editor="${EDITOR-vi} ${EDITOR_BOTTOM-}"
+#-----------------------------------------------------------------------
+# Parse VISUAL and friends
+#-----------------------------------------------------------------------
+
+unset editor_bottom
+
+if [[ ${VISUAL+x} ]]; then
+  editor=$VISUAL
+  if [[ ${VISUAL_BOTTOM+x} ]]; then
+    editor_bottom=$VISUAL_BOTTOM
+  fi
+elif [[ ${EDITOR+x} ]]; then
+  editor=$EDITOR
+  if [[ ${EDITOR_BOTTOM+x} ]]; then
+    editor_bottom=$EDITOR_BOTTOM
+  fi
+else
+  editor=vi
+  editor_bottom="-c '$'"
+fi
+
+if [[ ! ${editor_bottom+x} ]]; then
+  case $editor in (vi | vim)
+    editor_bottom="-c '$'"
+  esac
+fi
+
+editor="$editor ${editor_bottom-}"
+readonly editor
+
+#-----------------------------------------------------------------------
+
 gawk=gawk
 
 printf -v blank_heading -- -%.s {1..72}

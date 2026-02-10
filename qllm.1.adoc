@@ -41,6 +41,14 @@ ifdef::x_manpage[]
 :x_short_option_2b: pass:n[**-g**]
 :x_short_option_2c: pass:n[**-fg**]
 :x_short_option_2d: pass:n[**-f{nbsp}-g**]
+:x_var_EDITOR: pass:n[**EDITOR**]
+:x_var_EDITOR_BOTTOM: pass:n[**EDITOR_BOTTOM**]
+:x_var_VISUAL: pass:n[**VISUAL**]
+:x_var_VISUAL_BOTTOM: pass:n[**VISUAL_BOTTOM**]
+:x_var_VISUAL_eq_vi: pass:n[**VISUAL=vi**]
+:x_var_default_editor_bottom: pass:n[**-c '$'**]
+:x_vi: pass:n[**vi**]
+:x_vim: pass:n[**vim**]
 
 endif::[]
 
@@ -68,6 +76,14 @@ ifndef::x_manpage[]
 :x_short_option_2b: pass:n[``-g``]
 :x_short_option_2c: pass:n[``-fg``]
 :x_short_option_2d: pass:n[``-f{nbsp}-g``]
+:x_var_EDITOR: pass:n[``EDITOR``]
+:x_var_EDITOR_BOTTOM: pass:n[``EDITOR_BOTTOM``]
+:x_var_VISUAL: pass:n[``VISUAL``]
+:x_var_VISUAL_BOTTOM: pass:n[``VISUAL_BOTTOM``]
+:x_var_VISUAL_eq_vi: pass:n[``VISUAL=vi``]
+:x_var_default_editor_bottom: pass:n[``-c '$'``]
+:x_vi: pass:n[``vi``]
+:x_vim: pass:n[``vim``]
 
 endif::[]
 
@@ -171,7 +187,25 @@ int main(void) {
 
 == Environment variables
 
-TODO
+{x_var_VISUAL} or {x_var_EDITOR}::
+The command to run your text editor.
+The first of these variables that is set will be used.
+If none of these variables are set, {x_vi} will be used by default.
+
+{x_var_VISUAL_BOTTOM} or {x_var_EDITOR_BOTTOM}::
+The arguments to pass to your text editor to make it scroll to the
+bottom when opening a file.
+Only the variable that matches the text editor variable you're using
+will be used.
+For example, {x_var_VISUAL_BOTTOM} will only be used if you're using
+{x_var_VISUAL}.
+If this variable is unset, it will be inferred if your text editor is
+exactly either {x_vi} or {x_vim}.
+For example, if you're using {x_var_VISUAL_eq_vi} and you leave
+{x_var_VISUAL_BOTTOM} unset, it will be inferred as
+{x_var_default_editor_bottom}.
+If you're letting your text editor default to {x_vi}, this will default
+to {x_var_default_editor_bottom}.
 
 == Examples
 
