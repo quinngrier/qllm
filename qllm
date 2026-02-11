@@ -31,6 +31,17 @@ barf() {
 }; readonly -f barf
 
 #-----------------------------------------------------------------------
+# warn <text>...
+#-----------------------------------------------------------------------
+
+warn() {
+  local text
+  text="$@"
+  readonly text
+  printf '%s\n' "$0: Warning: $text." >&2
+}; readonly -f warn
+
+#-----------------------------------------------------------------------
 # search_up <&r> <p>
 #-----------------------------------------------------------------------
 #
@@ -120,7 +131,7 @@ curl_with_retries() {
         barf "HTTPS request retry limit exceeded"
       fi
       ((retry_delay *= 2))
-      printf '%s\n' "$0: Warning: HTTPS request failed with response code $response_code. Retrying in $retry_delay seconds." >&2
+      warn "HTTPS request failed with response code $response_code"
       sleep $retry_delay
       continue
     else
