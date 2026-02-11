@@ -19,6 +19,18 @@ set -E -e -o pipefail -u || exit $?
 trap exit ERR
 
 #-----------------------------------------------------------------------
+# barf <text>...
+#-----------------------------------------------------------------------
+
+barf() {
+  local text
+  text="$@"
+  readonly text
+  printf '%s\n' "$0: Error: $text." >&2
+  exit 1
+}; readonly -f barf
+
+#-----------------------------------------------------------------------
 # search_up <&r> <p>
 #-----------------------------------------------------------------------
 #
@@ -105,16 +117,14 @@ curl_with_retries() {
       break
     elif [[ $response_code =~ $retry_code_regex ]]; then
       if ((++num_retries > max_retries)); then
-        printf '%s\n' "$0: Error: HTTPS request retry limit exceeded." >&2
-        exit 1
+        barf "HTTPS request retry limit exceeded"
       fi
       ((retry_delay *= 2))
       printf '%s\n' "$0: Warning: HTTPS request failed with response code $response_code. Retrying in $retry_delay seconds." >&2
       sleep $retry_delay
       continue
     else
-      printf '%s\n' "$0: Error: HTTPS request failed with response code $response_code." >&2
-      exit 1
+      barf "HTTPS request failed with response code $response_code"
     fi
   done
 
@@ -190,8 +200,7 @@ while (($# > 0)); do
       --model \
     )
       if (($# < 2)); then
-        printf '%s\n' "$0: $1 requires an argument" >&2
-        exit 1
+        barf "$1 requires an argument"
       fi
       x=$1=$2
       shift 2
@@ -204,8 +213,7 @@ while (($# > 0)); do
 
     ;; (-[m])
       if (($# < 2)); then
-        printf '%s\n' "$0: $1 requires an argument" >&2
-        exit 1
+        barf "$1 requires an argument"
       fi
       x=${short_to_long[$1]}=$2
       shift 2
@@ -251,8 +259,7 @@ while (($# > 0)); do
       --=* \
     )
       x=${1%%=*}
-      printf '%s\n' "$0: $x forbids an argument" >&2
-      exit 1
+      barf "$x forbids an argument"
 
     #-------------------------------------------------------------------
     # Unknown long options
@@ -260,8 +267,7 @@ while (($# > 0)); do
 
     ;; (--*)
       x=${1%%=*}
-      printf '%s\n' "$0: Unknown option: ${x@Q}" >&2
-      exit 1
+      barf "Unknown option: ${x@Q}"
 
     #-------------------------------------------------------------------
     # Unknown short options
@@ -269,8 +275,7 @@ while (($# > 0)); do
 
     ;; (-?*)
       x=${1:0:2}
-      printf '%s\n' "$0: Unknown option: ${x@Q}" >&2
-      exit 1
+      barf "Unknown option: ${x@Q}"
 
     #-------------------------------------------------------------------
     esac
@@ -279,8 +284,7 @@ while (($# > 0)); do
   if [[ ! ${session_file+x} ]]; then
     session_file=$1
   else
-    printf '%s\n' "$0: Too many operands" >&2
-    exit 1
+    barf "Too many operands"
   fi
 
   shift
@@ -579,8 +583,7 @@ while :; do
 
   model=${model_map[$QLLM_MODEL]-}
   if [[ ! $model ]]; then
-    printf '%s\n' "$0: Unknown model: ${QLLM_MODEL@Q}" >&2
-    exit 1
+    barf "Unknown model: ${QLLM_MODEL@Q}"
   fi
 
   ${init_functions[$QLLM_MODEL]}
