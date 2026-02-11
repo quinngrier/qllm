@@ -56,6 +56,73 @@ search_up_or_home() {
 }; readonly -f search_up_or_home
 
 #-----------------------------------------------------------------------
+# curl_with_retries <&response_body> <request_body>
+#                   <success_code_regex> <retry_code_regex>
+#                   <arg>...
+#-----------------------------------------------------------------------
+
+curl_with_retries() {
+
+  local -n curl_with_retries__response_body="$1"
+  shift
+
+  local -r request_body="$1"
+  shift
+
+  local -r success_code_regex="$1"
+  shift
+
+  local -r retry_code_regex="$1"
+  shift
+
+  local -r max_retries=4
+  local -r write_out='\n%{http_code}'
+
+  local num_retries=0
+  local retry_delay=1
+  local response_body
+  local response_code
+  while :; do
+    if [[ $request_body ]]; then
+      response_body=$(
+        curl -L -S -s \
+          -w "$write_out" \
+          "$@" \
+          <<<"$request_body" \
+        ;
+      )
+    else
+      response_body=$(
+        curl -L -S -s \
+          -w "$write_out" \
+          "$@" \
+        ;
+      )
+    fi
+    response_code=${response_body##*$'\n'}
+    response_body=${response_body%$'\n'*}
+    if [[ $response_code =~ $success_code_regex ]]; then
+      break
+    elif [[ $response_code =~ $retry_code_regex ]]; then
+      if ((++num_retries > max_retries)); then
+        printf '%s\n' "$0: Error: HTTPS request retry limit exceeded." >&2
+        exit 1
+      fi
+      ((retry_delay *= 2))
+      printf '%s\n' "$0: Warning: HTTPS request failed with response code $response_code. Retrying in $retry_delay seconds." >&2
+      sleep $retry_delay
+      continue
+    else
+      printf '%s\n' "$0: Error: HTTPS request failed with response code $response_code." >&2
+      exit 1
+    fi
+  done
+
+  curl_with_retries__response_body=$response_body
+
+}; readonly -f curl_with_retries
+
+#-----------------------------------------------------------------------
 
 declare -r \
   default_system_prompt="You and the user are experts. Keep your answers short. Don't show any personality." \
@@ -558,16 +625,17 @@ while :; do
     printf 'parsed_completions_request = %s\n' "$x" >&2
   fi
 
-  completions_response=$(
-    curl -L -S -f -s \
-      -X POST \
-      --url "$completions_url" \
-      -H "Authorization: Bearer $completions_bearer" \
-      -H "Content-Type: application/json" \
-      --data-binary @- \
-      <<<"$completions_request" \
-    ;
-  )
+  curl_with_retries \
+    completions_response \
+    "$completions_request" \
+    '^(200)$' \
+    '^(401)$' \
+    -X POST \
+    --url "$completions_url" \
+    -H "Authorization: Bearer $completions_bearer" \
+    -H "Content-Type: application/json" \
+    --data-binary @- \
+  ;
 
   if [[ ${QLLM_DEBUG+x} ]]; then
     printf 'completions_response = %s\n' "$completions_response" >&2
