@@ -665,7 +665,26 @@ while :; do
     printf 'parsed_completions_response = %s\n' "$x" >&2
   fi
 
-  jq -r '.choices[0].message.content' <<<"$completions_response" | {
+  # TODO: Right now I'm just taking the model's write_text_file calls
+  # and updating the model's response as if the files had been inlined.
+
+  jq -r '
+    .
+    | .choices[0].message
+    | [.content] + (.
+      | .tool_calls // []
+      | map(.
+        | .function
+        | select(.name == "write_text_file")
+        | .arguments
+        | fromjson
+        | .content |= (if endswith("\n") then . else . + "\n" end)
+        | "Here is the file `\(.path)`:\n\n```\n\(.content)```"
+        )
+      )
+    | map(select(.))
+    | join("\n\n")
+  ' <<<"$completions_response" | {
     printf '\n\n%s\n\n' "$model_heading"
     cat
   } >>"$session_file"
