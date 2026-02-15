@@ -459,7 +459,7 @@ declare -r qllm_to_completions_gawk='
       if (x) {
         x = x "\n";
       }
-      y = "Here is the file `" heredoc "`:\n\n";
+      y = "Here is the content of the file `" heredoc "`:\n\n";
       x = y "```" get_fence_type(heredoc) "\n" x "```";
       heredoc = "";
     } else {
@@ -679,7 +679,7 @@ while :; do
         | .arguments
         | fromjson
         | .content |= (if endswith("\n") then . else . + "\n" end)
-        | "Here is the file `\(.path)`:\n\n```\n\(.content)```"
+        | "Here is the content of the file `\(.path)`:\n\n```\n\(.content)```"
         )
       )
     | map(select(.))
