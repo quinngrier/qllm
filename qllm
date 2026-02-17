@@ -16,16 +16,14 @@
 # See <https://github.com/quinngrier/qllm>.
 #
 
-case ${BASH_VERSINFO-} in [0-4] | '' | *[!0-9]*)
-  text="This script requires Bash version 5 or later"
-  text="$text. You have version ${BASH_VERSION-unknown}"
-  printf '%s\n' "$0: Error: $text." >&2
-  exit 1
-esac
+#-----------------------------------------------------------------------
+# Set up initial error handling
+#-----------------------------------------------------------------------
 
-set -E -e -o pipefail -u || exit $?
-trap exit ERR
+set -e -u || exit
 
+#-----------------------------------------------------------------------
+# Set up qsh
 #-----------------------------------------------------------------------
 #
 # This section was generated using qsh.
@@ -54,7 +52,7 @@ qsh_barf() {
 
   printf '%s\n' "$qsh_barf_message" >&2
 
-  exit "${qsh_barf_status-1}"
+  exit "${qsh_exit_status-1}"
 
 }
 
@@ -75,6 +73,21 @@ qsh_warn() {
 }
 
 #-----------------------------------------------------------------------
+# Set up Bash
+#-----------------------------------------------------------------------
+
+case ${BASH_VERSINFO-} in ('' | *[!0-9]* | 0* | [0-4])
+  qsh_barf \
+    "This script requires Bash version 5.0 or later." \
+    "You have version ${BASH_VERSION-unknown}" \
+  ;
+esac
+
+set -o pipefail
+
+shopt -s \
+  inherit_errexit \
+;
 
 #-----------------------------------------------------------------------
 # search_up <&r> <p>
