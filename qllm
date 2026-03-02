@@ -358,7 +358,7 @@ session_file_new=$session_file.new
 readonly session_file_new
 
 if [[ ! ${QLLM_MODEL+x} ]]; then
-  QLLM_MODEL=vertex-gemini-2.5-flash
+  qsh_barf "You must select a model using --model or QLLM_MODEL"
 fi
 
 #-----------------------------------------------------------------------
