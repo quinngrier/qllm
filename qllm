@@ -377,6 +377,8 @@ vertex_init() {
 
 #-----------------------------------------------------------------------
 
+# TODO: google/gemini-3-pro-preview will be discontinued on 2026-03-26.
+
 declare -A -r model_map=(
   # Listed in Google Cloud's web UI under Vertex AI > Model Garden.
   [vertex-gemini-2.5-flash]="google/gemini-2.5-flash"
