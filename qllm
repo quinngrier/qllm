@@ -526,7 +526,7 @@ declare -r qllm_to_completions_gawk='
       content = content "\"text\": " x;
       content = content "}";
     } else if (role == "assistant") {
-      if (!tool_call) {
+      if (!in_write_text_file) {
         sub("^[\n ]*", "", x);
         sub("[\n ]*$", "", x);
         if (content) {
@@ -562,7 +562,7 @@ declare -r qllm_to_completions_gawk='
         tool_call_answers = tool_call_answers "\"tool_call_id\": " tool_call_id ", ";
         tool_call_answers = tool_call_answers "\"content\": \"success\"";
         tool_call_answers = tool_call_answers "}";
-        tool_call = 0;
+        in_write_text_file = 0;
       }
     } else {
       barf("Unknown role: " role);
@@ -682,7 +682,7 @@ declare -r qllm_to_completions_gawk='
       z = $0;
       if (sub(/^@@@ *> */, "", z)) {
         sub(/ *$/, "", z);
-        if (!z && !tool_call) {
+        if (!z && !in_write_text_file) {
           barf("Orphan @@@> block terminator");
         }
         add_part();
@@ -691,7 +691,7 @@ declare -r qllm_to_completions_gawk='
           if (split(z, foo, " ---- ") != 2) {
             barf("Bad @@@> line");
           }
-          tool_call = 1;
+          in_write_text_file = 1;
           tool_call_path = foo[1];
           tool_call_id = foo[2];
         }
