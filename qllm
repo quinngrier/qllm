@@ -499,7 +499,7 @@ declare -r qllm_to_completions_gawk='
     return "";
   }
 
-  function add_text_content(    x, y) {
+  function add_part(    x, y) {
     x = buffer;
     buffer = "";
     if (role == "user" || role == "system") {
@@ -607,7 +607,7 @@ declare -r qllm_to_completions_gawk='
   BEGIN {
     role = "system";
     buffer = system_prompt;
-    add_text_content();
+    add_part();
     add_message();
     role = "user";
 
@@ -637,13 +637,13 @@ declare -r qllm_to_completions_gawk='
   {
     if ($0 ~ /^@@@ *user[ -]*$/) {
       if (role == "assistant") {
-        add_text_content();
+        add_part();
         add_message();
         role = "user";
       }
     } else if ($0 ~ /^@@@ *model[ -]*$/) {
       if (role == "user") {
-        add_text_content();
+        add_part();
         add_message();
         role = "assistant";
       }
@@ -654,7 +654,7 @@ declare -r qllm_to_completions_gawk='
         if (!z && !heredoc) {
           barf("Orphan @@@<< block terminator");
         }
-        add_text_content();
+        add_part();
         heredoc = z;
       } else if (sub(/^@@@ *< */, "", z)) {
         sub(/ *$/, "", z);
@@ -664,12 +664,12 @@ declare -r qllm_to_completions_gawk='
         if (heredoc) {
           barf("The @@@< directive cannot be used in a @@@<< block");
         }
-        add_text_content();
+        add_part();
         heredoc = z;
         buffer = read_text_file(heredoc);
         sub(/</, "<<", $0);
         $0 = $0 "\n" buffer "\n@@@<<";
-        add_text_content();
+        add_part();
       } else if ($0 ~ /^@@@/) {
         barf("Unknown directive: " $0);
       } else {
@@ -685,7 +685,7 @@ declare -r qllm_to_completions_gawk='
         if (!z && !tool_call) {
           barf("Orphan @@@> block terminator");
         }
-        add_text_content();
+        add_part();
         if (z) {
           sub(/ *$/, "", z);
           if (split(z, foo, " ---- ") != 2) {
@@ -711,7 +711,7 @@ declare -r qllm_to_completions_gawk='
     if (exit_status) {
       exit exit_status;
     }
-    add_text_content(buffer);
+    add_part(buffer);
     add_message();
     body = "{";
     body = body "\"model\": " json_quote(model) ", ";
