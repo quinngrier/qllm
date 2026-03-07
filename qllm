@@ -796,12 +796,13 @@ while :; do
 
   while :; do
 
-    # TODO: Prevent model from injecting by adding a leading space to @@@ lines
     x=$(
       eval " $jq"' -r '\''
         .
         | .choices[0].message.content // ""
         | gsub("^\\s+|\\s+$"; "")
+        | sub("^@@@"; " @@@")
+        | gsub("\n@@@"; "\n @@@")
         | if . == "" then . else "\n\n" + . end
       '\' <<<"$completions_response"
     )
@@ -861,7 +862,8 @@ while :; do
 
       printf '\n\n%s\n' "@@@> $path ---- $id" >>"$session_file"
 
-      # TODO: Prevent model from injecting by adding a leading space to @@@ lines (only for display, not for the actual write above)
+      content=${content/#@@@/ @@@}
+      content=${content//$'\n@@@'/$'\n @@@'}
       printf '%s' "$content@@@>" >>"$session_file"
 
       completions_request=$(
