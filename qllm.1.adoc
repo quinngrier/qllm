@@ -21,6 +21,12 @@ ifdef::x_manpage[]
 :manmanual: qllm
 :mansource: qllm
 
+:x_asterisk: pass:n[**++*++**]
+:x_atatat_gt: pass:n[**@@@>**]
+:x_brackets: pass:n[**++[]++**]
+:x_dotdot: pass:n[**..**]
+:x_foo: pass:n[**foo**]
+:x_foo_slash_star: pass:n[**++foo/*++**]
 :x_long_option_1a: pass:n[**--foo=**<__bar__>]
 :x_long_option_1b: pass:n[**--foo**{nbsp}<__bar__>]
 :x_opt_d_name: pass:n[**-d**]
@@ -35,12 +41,14 @@ ifdef::x_manpage[]
 :x_qllm: pass:n[**qllm**]
 :x_qllm_option: pass:n[<__option__>]
 :x_qllm_session_file: pass:n[<__session_file__>]
+:x_question_mark: pass:n[**?**]
 :x_short_option_1a: pass:n[**-f**{nbsp}<__bar__>]
 :x_short_option_1b: pass:n[**-f**<__bar__>]
 :x_short_option_2a: pass:n[**-f**]
 :x_short_option_2b: pass:n[**-g**]
 :x_short_option_2c: pass:n[**-fg**]
 :x_short_option_2d: pass:n[**-f{nbsp}-g**]
+:x_slash: pass:n[**/**]
 :x_var_EDITOR: pass:n[**EDITOR**]
 :x_var_EDITOR_BOTTOM: pass:n[**EDITOR_BOTTOM**]
 :x_var_VISUAL: pass:n[**VISUAL**]
@@ -56,6 +64,12 @@ ifndef::x_manpage[]
 
 = `qllm`
 
+:x_asterisk: pass:n[``++*++``]
+:x_atatat_gt: pass:n[``@@@>``]
+:x_brackets: pass:n[``++[]++``]
+:x_dotdot: pass:n[``..``]
+:x_foo: pass:n[``foo``]
+:x_foo_slash_star: pass:n[``++foo/*++``]
 :x_long_option_1a: pass:n[``--foo=<bar>``]
 :x_long_option_1b: pass:n[``--foo{nbsp}<bar>``]
 :x_opt_d_name: pass:n[``-d``]
@@ -70,12 +84,14 @@ ifndef::x_manpage[]
 :x_qllm: pass:n[``qllm``]
 :x_qllm_option: pass:n[``<option>``]
 :x_qllm_session_file: pass:n[``<session_file>``]
+:x_question_mark: pass:n[``?``]
 :x_short_option_1a: pass:n[``-f{nbsp}<bar>``]
 :x_short_option_1b: pass:n[``-f<bar>``]
 :x_short_option_2a: pass:n[``-f``]
 :x_short_option_2b: pass:n[``-g``]
 :x_short_option_2c: pass:n[``-fg``]
 :x_short_option_2d: pass:n[``-f{nbsp}-g``]
+:x_slash: pass:n[``/``]
 :x_var_EDITOR: pass:n[``EDITOR``]
 :x_var_EDITOR_BOTTOM: pass:n[``EDITOR_BOTTOM``]
 :x_var_VISUAL: pass:n[``VISUAL``]
@@ -87,8 +103,8 @@ ifndef::x_manpage[]
 
 endif::[]
 
+:x_example_number: 0
 :x_qllm_tagline: Large language model CLI wrapper
-
 :x_subs_normal: attributes,specialchars,quotes,replacements,macros,post_replacements
 :x_subs_source: attributes,specialchars,quotes,macros
 
@@ -184,6 +200,49 @@ int main(void) {
 }
 @@@<<
 ----
+
+== Output file directive
+
+The
+{x_atatat_gt}
+directive gives the model permission to output files.
+
+.Example {counter:x_example_number}
+----
+Output a fizzbuzz program to the main.c file.
+@@@> main.c
+----
+
+.Example {counter:x_example_number}
+----
+Revise this fizzbuzz program to use 4 and 6 instead of 3 and 5.
+@@@< main.c
+@@@> main.c
+----
+
+The argument to the
+{x_atatat_gt}
+directive is a glob pattern, where the
+{x_asterisk},
+{x_question_mark},
+and
+{x_brackets}
+operators are permitted to match
+{x_slash}
+characters.
+For example,
+{x_foo_slash_star}
+will give permission to output files anywhere below the
+{x_foo}
+directory.
+
+Output file directives persist for the rest of the session, not just the
+current prompt.
+
+The model is always forbidden from outputting files to absolute paths
+and paths containing
+{x_dotdot}
+components, even if you try to permit it.
 
 == Environment variables
 
