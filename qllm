@@ -670,6 +670,15 @@ declare -r qllm_to_completions_gawk='
         sub(/</, "<<", $0);
         $0 = $0 "\n" buffer "\n@@@<<";
         add_part();
+      } else if (sub(/^@@@ *> */, "", z)) {
+        sub(/ *$/, "", z);
+        if (z) {
+          z = json_quote(z);
+          if (output_patterns) {
+            output_patterns = output_patterns ", ";
+          }
+          output_patterns = output_patterns z;
+        }
       } else if ($0 ~ /^@@@/) {
         barf("Unknown directive: " $0);
       } else {
@@ -716,7 +725,10 @@ declare -r qllm_to_completions_gawk='
     body = "{";
     body = body "\"model\": " json_quote(model) ", ";
     body = body "\"messages\": [" messages "], ";
-    body = body "\"tools\": [" tools "]";
+    body = body "\"tools\": [" tools "], ";
+    body = body "\"qllm\": {";
+    body = body "\"output_patterns\": [" output_patterns "]";
+    body = body "}";
     body = body "}";
     print body;
   }
@@ -773,6 +785,23 @@ while :; do
     x=$(jq . <<<"$completions_request" 2>&1)
     printf 'parsed_completions_request = %s\n' "$x" >&2
   fi
+
+  output_patterns=$(
+    eval " $jq"' -r '\''
+      .
+      | .qllm.output_patterns
+      | map(@sh)
+      | join(" ")
+    '\' <<<"$completions_request"
+  )
+  eval "output_patterns=($output_patterns)"
+
+  completions_request=$(
+    eval " $jq"' '\''
+      .
+      | del(.qllm)
+    '\' <<<"$completions_request"
+  )
 
   curl_with_retries \
     completions_response \
@@ -859,7 +888,15 @@ while :; do
         continue
       esac
 
-      # TODO: If path is permitted, then actually write out the file.
+      for output_pattern in "${output_patterns[@]}"; do
+        if [[ $path == $output_pattern ]]; then
+          if [[ $path == */* ]]; then
+            mkdir -p -- "${path%/*}"
+          fi
+          printf -- %s "$content" >"$path"
+          break
+        fi
+      done
 
       printf '\n\n%s\n' "@@@> $path ---- $id" >>"$session_file"
 
