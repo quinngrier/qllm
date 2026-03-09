@@ -190,10 +190,10 @@ int main(void) { puts("Hello, qllm!"); return 0; }
 @@@<<
 ----
 
-When using the
+When the
 {x_atatat_ltlt}
-directive multiple times in a row, the intermediate terminating
-directives can be omitted.
+directive is used multiple times in a row, the intermediate terminators
+can be omitted.
 
 .Example {counter:x_example_number}
 ----
@@ -250,7 +250,9 @@ current prompt.
 The model is always forbidden from outputting files to absolute paths
 and paths containing
 {x_dotdot}
-components, even if you try to permit it.
+components, even if an
+{x_atatat_gt}
+directive tries to permit it.
 
 == Environment variables
 
@@ -264,15 +266,15 @@ The arguments to pass to your text editor to make it scroll to the
 bottom when opening a file.
 Only the variable that matches the text editor variable you're using
 will be used.
-For example, {x_var_VISUAL_BOTTOM} will only be used if you're using
+For example, only {x_var_VISUAL_BOTTOM} will be used if you're using
 {x_var_VISUAL}.
++
 If this variable is unset, it will be inferred if your text editor is
-exactly either {x_vi} or {x_vim}.
+exactly {x_vi} or {x_vim}.
 For example, if you're using {x_var_VISUAL_eq_vi} and you leave
 {x_var_VISUAL_BOTTOM} unset, it will be inferred as
 {x_var_default_editor_bottom}.
-If you're letting your text editor default to {x_vi}, this will default
-to {x_var_default_editor_bottom}.
+This also applies if you're letting your text editor default to {x_vi}.
 
 == Examples
 
