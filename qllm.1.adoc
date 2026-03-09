@@ -23,6 +23,8 @@ ifdef::x_manpage[]
 
 :x_asterisk: pass:n[**++*++**]
 :x_atatat_gt: pass:n[**@@@>**]
+:x_atatat_lt: pass:n[**@@@<**]
+:x_atatat_ltlt: pass:n[**@@@<<**]
 :x_brackets: pass:n[**++[]++**]
 :x_dotdot: pass:n[**..**]
 :x_foo: pass:n[**foo**]
@@ -66,6 +68,8 @@ ifndef::x_manpage[]
 
 :x_asterisk: pass:n[``++*++``]
 :x_atatat_gt: pass:n[``@@@>``]
+:x_atatat_lt: pass:n[``@@@<``]
+:x_atatat_ltlt: pass:n[``@@@<<``]
 :x_brackets: pass:n[``++[]++``]
 :x_dotdot: pass:n[``..``]
 :x_foo: pass:n[``foo``]
@@ -153,51 +157,55 @@ instead of possibly being taken as {x_qllm_option}s.
 {x_opt_model_name_arg}, {x_opt_m_name_arg}:: Use {x_opt_model_arg}
 instead of the default model.
 
-== Text file inputs
+== Input file directive
 
-Text files can be added using the `@@@<` directive:
+The
+{x_atatat_lt}
+directive adds a file to the session.
 
+.Example {counter:x_example_number}
 ----
 Explain this program and show me how to compile it.
-
 @@@< main.c
 ----
 
-== Inline text file inputs
+The current content of the file will be captured and the
+{x_atatat_lt}
+directive will be converted into an
+{x_atatat_ltlt}
+directive.
 
-Text files can be added inline using the `@@@<<` directive:
+== Inline input file directive
 
+The
+{x_atatat_ltlt}
+directive adds a file to the session with content specified inline.
+
+.Example {counter:x_example_number}
 ----
 Explain this program and show me how to compile and run it.
-
 @@@<< main.c
 #include <stdio.h>
-int main(void) {
-  puts("Hello, qllm!");
-  return 0;
-}
+int main(void) { puts("Hello, qllm!"); return 0; }
 @@@<<
 ----
 
-When defining multiple inline text file inputs in a row, the
-intermediate ending directives can be omitted:
+When using the
+{x_atatat_ltlt}
+directive multiple times in a row, the intermediate terminating
+directives can be omitted.
 
+.Example {counter:x_example_number}
 ----
 Explain this program and show me how to compile and run it.
-
 @@@<< hello_qllm.h
 void hello_qllm(void);
 @@@<< hello_qllm.c
 #include <stdio.h>
-void hello_qllm(void) {
-  puts("Hello, qllm!");
-}
+void hello_qllm(void) { puts("Hello, qllm!"); }
 @@@<< main.c
 #include "hello_qllm.h"
-int main(void) {
-  hello_qllm();
-  return 0;
-}
+int main(void) { hello_qllm(); return 0; }
 @@@<<
 ----
 
