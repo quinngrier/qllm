@@ -169,9 +169,9 @@ Explain this program and show me how to compile it.
 @@@< main.c
 ----
 
-The current content of the file will be captured and the
+The file content is captured and the
 {x_atatat_lt}
-directive will be converted into an
+directive is converted into an
 {x_atatat_ltlt}
 directive.
 
@@ -179,7 +179,7 @@ directive.
 
 The
 {x_atatat_ltlt}
-directive adds a file to the session with content specified inline.
+directive adds an inline file to the session.
 
 .Example {counter:x_example_number}
 ----
@@ -192,8 +192,7 @@ int main(void) { puts("Hello, qllm!"); return 0; }
 
 When the
 {x_atatat_ltlt}
-directive is used multiple times in a row, the intermediate terminators
-can be omitted.
+directive is used successively, only the last terminator is required.
 
 .Example {counter:x_example_number}
 ----
