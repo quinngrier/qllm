@@ -732,6 +732,9 @@ qllm_to_completions_script=$(cat <<'EOF'
     if (exit_status) {
       exit exit_status;
     }
+    if (heredoc) {
+      barf("Runaway @@@<< block");
+    }
     add_part(buffer);
     add_message();
     body = "{";
