@@ -175,6 +175,14 @@ directive is converted into an
 {x_atatat_ltlt}
 directive.
 
+Note that the file path will be sent to the model because it will be
+reproduced in the
+{x_atatat_ltlt}
+directive.
+If you want to hide the file path, you should use the
+{x_atatat_ltlt}
+directive directly.
+
 == Inline input file directive
 
 The
