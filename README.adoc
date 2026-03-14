@@ -41,12 +41,13 @@ You can check this by running `gcloud --version`.
 it in your `PATH`.
 
 . Set your `VISUAL` environment variable to your text editor.
-For example, `export VISUAL=vim`.
+For example, you can add `export VISUAL=vim` to your `~/.bash_profile`.
 
 . Optionally set your `VISUAL_BOTTOM` environment variable to the
 arguments to pass to your text editor to make it scroll to the bottom
 when opening a file.
-For example, you can use `export VISUAL_BOTTOM=+` for Vim.
+For example, you can add `export VISUAL_BOTTOM=+` to your
+`~/.bash_profile` if you're using `vim`.
 
 . If you plan to use Vertex AI:
 
