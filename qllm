@@ -443,6 +443,8 @@ model_heading+=${blank_heading:${#model_heading}}
 readonly model_heading
 
 #-----------------------------------------------------------------------
+# qllm_to_completions_gawk
+#-----------------------------------------------------------------------
 
 declare -r qllm_to_completions_gawk='
 
