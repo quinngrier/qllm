@@ -445,6 +445,10 @@ readonly model_heading
 #-----------------------------------------------------------------------
 # qllm_to_completions_script
 #-----------------------------------------------------------------------
+#
+# This is the GNU Awk script that converts a .qllm file into a JSON
+# completions request.
+#
 
 qllm_to_completions_script=$(cat <<'EOF'
 
