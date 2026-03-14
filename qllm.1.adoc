@@ -10,125 +10,125 @@
 
 ifndef::env-github[]
 ifeval::["{backend}" == "manpage"]
-:x_manpage:
+:q_manpage:
 endif::[]
 endif::[]
 
-ifdef::x_manpage[]
+ifdef::q_manpage[]
 
 = qllm(1)
 :doctype: manpage
 :manmanual: qllm
 :mansource: qllm
 
-:x_asterisk: pass:n[**++*++**]
-:x_atatat_gt: pass:n[**@@@>**]
-:x_atatat_lt: pass:n[**@@@<**]
-:x_atatat_ltlt: pass:n[**@@@<<**]
-:x_brackets: pass:n[**++[]++**]
-:x_dotdot: pass:n[**..**]
-:x_foo: pass:n[**foo**]
-:x_foo_slash_star: pass:n[**++foo/*++**]
-:x_long_option_1a: pass:n[**--foo=**<__bar__>]
-:x_long_option_1b: pass:n[**--foo**{nbsp}<__bar__>]
-:x_opt_d_name: pass:n[**-d**]
-:x_opt_debug_name: pass:n[**--debug**]
-:x_opt_m_arg: pass:n[<__model__>]
-:x_opt_m_name: pass:n[**-m**]
-:x_opt_m_name_arg: pass:n[**-m**{nbsp}<__model__>]
-:x_opt_model_arg: pass:n[<__model__>]
-:x_opt_model_name: pass:n[**--model**]
-:x_opt_model_name_arg: pass:n[**--model=**<__model__>]
-:x_opt_terminator: pass:n[**--**]
-:x_qllm: pass:n[**qllm**]
-:x_qllm_option: pass:n[<__option__>]
-:x_qllm_session_file: pass:n[<__session_file__>]
-:x_question_mark: pass:n[**?**]
-:x_short_option_1a: pass:n[**-f**{nbsp}<__bar__>]
-:x_short_option_1b: pass:n[**-f**<__bar__>]
-:x_short_option_2a: pass:n[**-f**]
-:x_short_option_2b: pass:n[**-g**]
-:x_short_option_2c: pass:n[**-fg**]
-:x_short_option_2d: pass:n[**-f{nbsp}-g**]
-:x_slash: pass:n[**/**]
-:x_var_EDITOR: pass:n[**EDITOR**]
-:x_var_EDITOR_BOTTOM: pass:n[**EDITOR_BOTTOM**]
-:x_var_VISUAL: pass:n[**VISUAL**]
-:x_var_VISUAL_BOTTOM: pass:n[**VISUAL_BOTTOM**]
-:x_var_VISUAL_eq_vi: pass:n[**VISUAL=vi**]
-:x_var_default_editor_bottom: pass:n[**-c '$'**]
-:x_vi: pass:n[**vi**]
-:x_vim: pass:n[**vim**]
+:q_asterisk: pass:n[**++*++**]
+:q_atatat_gt: pass:n[**@@@>**]
+:q_atatat_lt: pass:n[**@@@<**]
+:q_atatat_ltlt: pass:n[**@@@<<**]
+:q_brackets: pass:n[**++[]++**]
+:q_dotdot: pass:n[**..**]
+:q_foo: pass:n[**foo**]
+:q_foo_slash_star: pass:n[**++foo/*++**]
+:q_long_option_1a: pass:n[**--foo=**<__bar__>]
+:q_long_option_1b: pass:n[**--foo**{nbsp}<__bar__>]
+:q_opt_d_name: pass:n[**-d**]
+:q_opt_debug_name: pass:n[**--debug**]
+:q_opt_m_arg: pass:n[<__model__>]
+:q_opt_m_name: pass:n[**-m**]
+:q_opt_m_name_arg: pass:n[**-m**{nbsp}<__model__>]
+:q_opt_model_arg: pass:n[<__model__>]
+:q_opt_model_name: pass:n[**--model**]
+:q_opt_model_name_arg: pass:n[**--model=**<__model__>]
+:q_opt_terminator: pass:n[**--**]
+:q_qllm: pass:n[**qllm**]
+:q_qllm_option: pass:n[<__option__>]
+:q_qllm_session_file: pass:n[<__session_file__>]
+:q_question_mark: pass:n[**?**]
+:q_short_option_1a: pass:n[**-f**{nbsp}<__bar__>]
+:q_short_option_1b: pass:n[**-f**<__bar__>]
+:q_short_option_2a: pass:n[**-f**]
+:q_short_option_2b: pass:n[**-g**]
+:q_short_option_2c: pass:n[**-fg**]
+:q_short_option_2d: pass:n[**-f{nbsp}-g**]
+:q_slash: pass:n[**/**]
+:q_var_EDITOR: pass:n[**EDITOR**]
+:q_var_EDITOR_BOTTOM: pass:n[**EDITOR_BOTTOM**]
+:q_var_VISUAL: pass:n[**VISUAL**]
+:q_var_VISUAL_BOTTOM: pass:n[**VISUAL_BOTTOM**]
+:q_var_VISUAL_eq_vi: pass:n[**VISUAL=vi**]
+:q_var_default_editor_bottom: pass:n[**-c '$'**]
+:q_vi: pass:n[**vi**]
+:q_vim: pass:n[**vim**]
 
 endif::[]
 
-ifndef::x_manpage[]
+ifndef::q_manpage[]
 
 = `qllm`
 
-:x_asterisk: pass:n[``++*++``]
-:x_atatat_gt: pass:n[``@@@>``]
-:x_atatat_lt: pass:n[``@@@<``]
-:x_atatat_ltlt: pass:n[``@@@<<``]
-:x_brackets: pass:n[``++[]++``]
-:x_dotdot: pass:n[``..``]
-:x_foo: pass:n[``foo``]
-:x_foo_slash_star: pass:n[``++foo/*++``]
-:x_long_option_1a: pass:n[``--foo=<bar>``]
-:x_long_option_1b: pass:n[``--foo{nbsp}<bar>``]
-:x_opt_d_name: pass:n[``-d``]
-:x_opt_debug_name: pass:n[``--debug``]
-:x_opt_m_arg: pass:n[``<model>``]
-:x_opt_m_name: pass:n[``-m``]
-:x_opt_m_name_arg: pass:n[``-m{nbsp}<model>``]
-:x_opt_model_arg: pass:n[``<model>``]
-:x_opt_model_name: pass:n[``--model``]
-:x_opt_model_name_arg: pass:n[``--model=<model>``]
-:x_opt_terminator: pass:n[``--``]
-:x_qllm: pass:n[``qllm``]
-:x_qllm_option: pass:n[``<option>``]
-:x_qllm_session_file: pass:n[``<session_file>``]
-:x_question_mark: pass:n[``?``]
-:x_short_option_1a: pass:n[``-f{nbsp}<bar>``]
-:x_short_option_1b: pass:n[``-f<bar>``]
-:x_short_option_2a: pass:n[``-f``]
-:x_short_option_2b: pass:n[``-g``]
-:x_short_option_2c: pass:n[``-fg``]
-:x_short_option_2d: pass:n[``-f{nbsp}-g``]
-:x_slash: pass:n[``/``]
-:x_var_EDITOR: pass:n[``EDITOR``]
-:x_var_EDITOR_BOTTOM: pass:n[``EDITOR_BOTTOM``]
-:x_var_VISUAL: pass:n[``VISUAL``]
-:x_var_VISUAL_BOTTOM: pass:n[``VISUAL_BOTTOM``]
-:x_var_VISUAL_eq_vi: pass:n[``VISUAL=vi``]
-:x_var_default_editor_bottom: pass:n[``-c '$'``]
-:x_vi: pass:n[``vi``]
-:x_vim: pass:n[``vim``]
+:q_asterisk: pass:n[``++*++``]
+:q_atatat_gt: pass:n[``@@@>``]
+:q_atatat_lt: pass:n[``@@@<``]
+:q_atatat_ltlt: pass:n[``@@@<<``]
+:q_brackets: pass:n[``++[]++``]
+:q_dotdot: pass:n[``..``]
+:q_foo: pass:n[``foo``]
+:q_foo_slash_star: pass:n[``++foo/*++``]
+:q_long_option_1a: pass:n[``--foo=<bar>``]
+:q_long_option_1b: pass:n[``--foo{nbsp}<bar>``]
+:q_opt_d_name: pass:n[``-d``]
+:q_opt_debug_name: pass:n[``--debug``]
+:q_opt_m_arg: pass:n[``<model>``]
+:q_opt_m_name: pass:n[``-m``]
+:q_opt_m_name_arg: pass:n[``-m{nbsp}<model>``]
+:q_opt_model_arg: pass:n[``<model>``]
+:q_opt_model_name: pass:n[``--model``]
+:q_opt_model_name_arg: pass:n[``--model=<model>``]
+:q_opt_terminator: pass:n[``--``]
+:q_qllm: pass:n[``qllm``]
+:q_qllm_option: pass:n[``<option>``]
+:q_qllm_session_file: pass:n[``<session_file>``]
+:q_question_mark: pass:n[``?``]
+:q_short_option_1a: pass:n[``-f{nbsp}<bar>``]
+:q_short_option_1b: pass:n[``-f<bar>``]
+:q_short_option_2a: pass:n[``-f``]
+:q_short_option_2b: pass:n[``-g``]
+:q_short_option_2c: pass:n[``-fg``]
+:q_short_option_2d: pass:n[``-f{nbsp}-g``]
+:q_slash: pass:n[``/``]
+:q_var_EDITOR: pass:n[``EDITOR``]
+:q_var_EDITOR_BOTTOM: pass:n[``EDITOR_BOTTOM``]
+:q_var_VISUAL: pass:n[``VISUAL``]
+:q_var_VISUAL_BOTTOM: pass:n[``VISUAL_BOTTOM``]
+:q_var_VISUAL_eq_vi: pass:n[``VISUAL=vi``]
+:q_var_default_editor_bottom: pass:n[``-c '$'``]
+:q_vi: pass:n[``vi``]
+:q_vim: pass:n[``vim``]
 
 endif::[]
 
-:x_example_number: 0
-:x_qllm_tagline: Large language model CLI wrapper
-:x_subs_normal: attributes,specialchars,quotes,replacements,macros,post_replacements
-:x_subs_source: attributes,specialchars,quotes,macros
+:q_example_number: 0
+:q_qllm_tagline: Large language model CLI wrapper
+:q_subs_normal: attributes,specialchars,quotes,replacements,macros,post_replacements
+:q_subs_source: attributes,specialchars,quotes,macros
 
 == Name
 
-ifdef::x_manpage[]
-qllm - {x_qllm_tagline}
+ifdef::q_manpage[]
+qllm - {q_qllm_tagline}
 endif::[]
 
-ifndef::x_manpage[]
-{x_qllm} &#x2014; {x_qllm_tagline}
+ifndef::q_manpage[]
+{q_qllm} &#x2014; {q_qllm_tagline}
 endif::[]
 
 == Synopsis
 
-ifdef::x_manpage[]
-{x_qllm} ++[++{x_qllm_option}++...]++ ++[++{x_qllm_session_file}++]++
+ifdef::q_manpage[]
+{q_qllm} ++[++{q_qllm_option}++...]++ ++[++{q_qllm_session_file}++]++
 endif::[]
 
-ifndef::x_manpage[]
+ifndef::q_manpage[]
 ----
 qllm [<option>...] [<session_file>]
 ----
@@ -140,56 +140,56 @@ TODO
 
 == Options
 
-A long option with a required argument {x_long_option_1a} may also be
-written as {x_long_option_1b}.
-A short option with a required argument {x_short_option_1a} may also be
-written as {x_short_option_1b} if the argument is not empty.
-A short option with a forbidden argument {x_short_option_2a} may be
+A long option with a required argument {q_long_option_1a} may also be
+written as {q_long_option_1b}.
+A short option with a required argument {q_short_option_1a} may also be
+written as {q_short_option_1b} if the argument is not empty.
+A short option with a forbidden argument {q_short_option_2a} may be
 bundled with a subsequent short option or short option bundle
-{x_short_option_2b} by writing {x_short_option_2c} instead of
-{x_short_option_2d}.
+{q_short_option_2b} by writing {q_short_option_2c} instead of
+{q_short_option_2d}.
 
-{x_opt_terminator}:: All further arguments will be taken as operands
-instead of possibly being taken as {x_qllm_option}s.
+{q_opt_terminator}:: All further arguments will be taken as operands
+instead of possibly being taken as {q_qllm_option}s.
 
-{x_opt_debug_name}, {x_opt_d_name}:: Print debug information to stderr.
+{q_opt_debug_name}, {q_opt_d_name}:: Print debug information to stderr.
 
-{x_opt_model_name_arg}, {x_opt_m_name_arg}:: Use {x_opt_model_arg}
+{q_opt_model_name_arg}, {q_opt_m_name_arg}:: Use {q_opt_model_arg}
 instead of the default model.
 
 == Input file directive
 
 The
-{x_atatat_lt}
+{q_atatat_lt}
 directive adds a file to the session.
 
-.Example {counter:x_example_number}
+.Example {counter:q_example_number}
 ----
 Explain this program and show me how to compile it.
 @@@< main.c
 ----
 
 The file content is captured and the
-{x_atatat_lt}
+{q_atatat_lt}
 directive is converted into an
-{x_atatat_ltlt}
+{q_atatat_ltlt}
 directive.
 
 Note that the file path will be sent to the model because it will be
 reproduced in the
-{x_atatat_ltlt}
+{q_atatat_ltlt}
 directive.
 If you want to hide the file path, you should use the
-{x_atatat_ltlt}
+{q_atatat_ltlt}
 directive directly.
 
 == Inline input file directive
 
 The
-{x_atatat_ltlt}
+{q_atatat_ltlt}
 directive adds an inline file to the session.
 
-.Example {counter:x_example_number}
+.Example {counter:q_example_number}
 ----
 Explain this program and show me how to compile and run it.
 @@@<< main.c
@@ -199,10 +199,10 @@ int main(void) { puts("Hello, qllm!"); return 0; }
 ----
 
 When the
-{x_atatat_ltlt}
+{q_atatat_ltlt}
 directive is used successively, only the last terminator is required.
 
-.Example {counter:x_example_number}
+.Example {counter:q_example_number}
 ----
 Explain this program and show me how to compile and run it.
 @@@<< hello_qllm.h
@@ -219,16 +219,16 @@ int main(void) { hello_qllm(); return 0; }
 == Output file directive
 
 The
-{x_atatat_gt}
+{q_atatat_gt}
 directive gives the model permission to output files.
 
-.Example {counter:x_example_number}
+.Example {counter:q_example_number}
 ----
 Output a fizzbuzz program to the main.c file.
 @@@> main.c
 ----
 
-.Example {counter:x_example_number}
+.Example {counter:q_example_number}
 ----
 Revise this fizzbuzz program to use 4 and 6 instead of 3 and 5.
 @@@< main.c
@@ -236,19 +236,19 @@ Revise this fizzbuzz program to use 4 and 6 instead of 3 and 5.
 ----
 
 The argument to the
-{x_atatat_gt}
+{q_atatat_gt}
 directive is a glob pattern, where the
-{x_asterisk},
-{x_question_mark},
+{q_asterisk},
+{q_question_mark},
 and
-{x_brackets}
+{q_brackets}
 operators are permitted to match
-{x_slash}
+{q_slash}
 characters.
 For example,
-{x_foo_slash_star}
+{q_foo_slash_star}
 will give permission to output files anywhere below the
-{x_foo}
+{q_foo}
 directory.
 
 Output file directives persist for the rest of the session, not just the
@@ -256,32 +256,32 @@ current prompt.
 
 The model is always forbidden from outputting files to absolute paths
 and paths containing
-{x_dotdot}
+{q_dotdot}
 components, even if an
-{x_atatat_gt}
+{q_atatat_gt}
 directive tries to permit it.
 
 == Environment variables
 
-{x_var_VISUAL} or {x_var_EDITOR}::
+{q_var_VISUAL} or {q_var_EDITOR}::
 The command to run your text editor.
 The first of these variables that is set will be used.
-If none of these variables are set, {x_vi} will be used by default.
+If none of these variables are set, {q_vi} will be used by default.
 
-{x_var_VISUAL_BOTTOM} or {x_var_EDITOR_BOTTOM}::
+{q_var_VISUAL_BOTTOM} or {q_var_EDITOR_BOTTOM}::
 The arguments to pass to your text editor to make it scroll to the
 bottom when opening a file.
 Only the variable that matches the text editor variable you're using
 will be used.
-For example, only {x_var_VISUAL_BOTTOM} will be used if you're using
-{x_var_VISUAL}.
+For example, only {q_var_VISUAL_BOTTOM} will be used if you're using
+{q_var_VISUAL}.
 +
 If this variable is unset, it will be inferred if your text editor is
-exactly {x_vi} or {x_vim}.
-For example, if you're using {x_var_VISUAL_eq_vi} and you leave
-{x_var_VISUAL_BOTTOM} unset, it will be inferred as
-{x_var_default_editor_bottom}.
-This also applies if you're letting your text editor default to {x_vi}.
+exactly {q_vi} or {q_vim}.
+For example, if you're using {q_var_VISUAL_eq_vi} and you leave
+{q_var_VISUAL_BOTTOM} unset, it will be inferred as
+{q_var_default_editor_bottom}.
+This also applies if you're letting your text editor default to {q_vi}.
 
 == Examples
 
