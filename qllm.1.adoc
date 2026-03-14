@@ -138,12 +138,16 @@ endif::[]
 
 == Description
 
-All text from the model that is written to the session file will be
-modified to insert a leading space character at the beginning of any
-line that starts with
-{q_atatat}.
-This prevents the model from injecting directives.
-This only affects the session file, not output files.
+To prevent
+{q_atatat}
+directives from being injected into the session file, a space character
+is prepended to any lines that begin with
+{q_atatat}
+that came from the model or the files read by the
+{q_atatat_lt}
+directive.
+This only affects the data written to the session file, not the data
+sent to the model or written to any output files.
 
 == Options
 
