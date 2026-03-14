@@ -110,7 +110,7 @@ ifndef::q_manpage[]
 endif::[]
 
 :q_example_number: 0
-:q_qllm_tagline: Large language model CLI wrapper
+:q_qllm_tagline: LLM CLI tool
 :q_subs_normal: attributes,specialchars,quotes,replacements,macros,post_replacements
 :q_subs_source: attributes,specialchars,quotes,macros
 
