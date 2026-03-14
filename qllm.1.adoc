@@ -169,9 +169,8 @@ Explain this program and show me how to compile it.
 @@@< main.c
 ----
 
-The file content is captured and the
-{q_atatat_lt}
-directive is converted into an
+The current file content is captured and the directive is converted into
+an
 {q_atatat_ltlt}
 directive.
 
