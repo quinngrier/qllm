@@ -40,7 +40,7 @@ You can check this by running `gcloud --version`.
 . Download the link:{x_download_url}[`qllm`] script and optionally put
 it in your `PATH`.
 
-. Set your `VISUAL` environment variable to your desired text editor.
+. Set your `VISUAL` environment variable to your text editor.
 For example, `export VISUAL=vim`.
 
 . Optionally set your `VISUAL_BOTTOM` environment variable to the
