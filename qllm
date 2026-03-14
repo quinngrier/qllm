@@ -664,7 +664,7 @@ qllm_to_completions_script=$(cat <<'EOF'
         heredoc = z;
       } else if (sub(/^@@@ *< */, "", z)) {
         if (heredoc) {
-          barf("The @@@< directive cannot be used in a @@@<< block");
+          barf("Directives cannot be used in an @@@<< block");
         }
         sub(/ *$/, "", z);
         if (!z) {
