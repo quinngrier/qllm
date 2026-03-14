@@ -677,6 +677,9 @@ qllm_to_completions_script=$(cat <<'EOF'
         $0 = $0 "\n" buffer "\n@@@<<";
         add_part();
       } else if (sub(/^@@@ *> */, "", z)) {
+        if (heredoc) {
+          barf("Directives cannot be used in an @@@<< block");
+        }
         sub(/ *$/, "", z);
         if (z) {
           z = json_quote(z);
@@ -686,6 +689,9 @@ qllm_to_completions_script=$(cat <<'EOF'
           output_patterns = output_patterns z;
         }
       } else if ($0 ~ /^@@@/) {
+        if (heredoc) {
+          barf("Directives cannot be used in an @@@<< block");
+        }
         barf("Unknown directive: " $0);
       } else {
         if (buffer) {
