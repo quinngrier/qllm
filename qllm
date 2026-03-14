@@ -443,10 +443,10 @@ model_heading+=${blank_heading:${#model_heading}}
 readonly model_heading
 
 #-----------------------------------------------------------------------
-# qllm_to_completions_gawk
+# qllm_to_completions_script
 #-----------------------------------------------------------------------
 
-qllm_to_completions_gawk=$(cat <<'EOF'
+qllm_to_completions_script=$(cat <<'EOF'
 
   function barf(message) {
     print(argv0 ": " message) >"/dev/stderr";
@@ -737,7 +737,7 @@ qllm_to_completions_gawk=$(cat <<'EOF'
 
 EOF
 )
-readonly qllm_to_completions_gawk
+readonly qllm_to_completions_script
 
 #-----------------------------------------------------------------------
 
@@ -777,7 +777,7 @@ while :; do
       -v sq="$sq" \
       -v system_prompt="$system_prompt" \
       -- \
-      "$qllm_to_completions_gawk" \
+      "$qllm_to_completions_script" \
       "$session_file" \
     ;'
   )
