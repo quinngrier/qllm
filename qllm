@@ -663,12 +663,12 @@ qllm_to_completions_script=$(cat <<'EOF'
         add_part();
         heredoc = z;
       } else if (sub(/^@@@ *< */, "", z)) {
+        if (heredoc) {
+          barf("The @@@< directive cannot be used in a @@@<< block");
+        }
         sub(/ *$/, "", z);
         if (!z) {
           barf("The @@@< directive requires a filename");
-        }
-        if (heredoc) {
-          barf("The @@@< directive cannot be used in a @@@<< block");
         }
         add_part();
         heredoc = z;
