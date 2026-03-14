@@ -22,6 +22,7 @@ ifdef::q_manpage[]
 :mansource: qllm
 
 :q_asterisk: pass:n[**++*++**]
+:q_atatat: pass:n[**@@@**]
 :q_atatat_gt: pass:n[**@@@>**]
 :q_atatat_lt: pass:n[**@@@<**]
 :q_atatat_ltlt: pass:n[**@@@<<**]
@@ -67,6 +68,7 @@ ifndef::q_manpage[]
 = `qllm`
 
 :q_asterisk: pass:n[``++*++``]
+:q_atatat: pass:n[``@@@``]
 :q_atatat_gt: pass:n[``@@@>``]
 :q_atatat_lt: pass:n[``@@@<``]
 :q_atatat_ltlt: pass:n[``@@@<<``]
@@ -136,7 +138,12 @@ endif::[]
 
 == Description
 
-TODO
+All text from the model that is written to the session file will be
+modified to insert a leading space character at the beginning of any
+line that starts with
+{q_atatat}.
+This prevents the model from injecting directives.
+This only affects the session file, not output files.
 
 == Options
 
