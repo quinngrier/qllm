@@ -761,7 +761,7 @@ EOF
 
   #---------------------------------------------------------------------
 
-  retry_code_regex='^(401)$'
+  retry_code_regex='^(401|429)$'
   readonly retry_code_regex
 
   while :; do
