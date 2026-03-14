@@ -193,754 +193,637 @@ curl_with_retries() {
 
 #-----------------------------------------------------------------------
 
-declare -r \
-  default_system_prompt="You and the user are experts. Keep your answers short. Don't show any personality." \
-  nl=$'\n' \
-  qllm_dir_name=.qllm \
-  sq=\' \
-;
+main() {
 
-system_prompt=$default_system_prompt
+  declare -r \
+    default_system_prompt="You and the user are experts. Keep your answers short. Don't show any personality." \
+    nl=$'\n' \
+    qllm_dir_name=.qllm \
+    sq=\' \
+  ;
 
-search_up_or_home x $qllm_dir_name/system_prompts/default
-if [[ $x ]]; then
-  system_prompt=$(<"$x")
-fi
+  system_prompt=$default_system_prompt
 
-#-----------------------------------------------------------------------
-# Parse the command-line arguments
-#-----------------------------------------------------------------------
+  search_up_or_home x $qllm_dir_name/system_prompts/default
+  if [[ $x ]]; then
+    system_prompt=$(<"$x")
+  fi
 
-declare -A -r short_to_long=(
-  [-d]=--debug
-  [-m]=--model
-)
+  #---------------------------------------------------------------------
+  # Parse the command-line arguments
+  #---------------------------------------------------------------------
 
-parse_options=1
+  declare -A -r short_to_long=(
+    [-d]=--debug
+    [-m]=--model
+  )
 
-unset session_file
+  parse_options=1
 
-while (($# > 0)); do
+  unset session_file
 
-  if ((parse_options)); then
+  while (($# > 0)); do
 
-    #-------------------------------------------------------------------
-    # Options terminator
-    #-------------------------------------------------------------------
+    if ((parse_options)); then
 
-    case $1 in (--)
-      parse_options=0
-      shift
-      continue
+      #-----------------------------------------------------------------
+      # Options terminator
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    # --debug, -d
-    #-------------------------------------------------------------------
+      case $1 in (--)
+        parse_options=0
+        shift
+        continue
 
-    ;; (--debug)
-      QLLM_DEBUG=
-      shift
-      continue
+      #-----------------------------------------------------------------
+      # --debug, -d
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    # --model=<model>, -m <model>
-    #-------------------------------------------------------------------
+      ;; (--debug)
+        QLLM_DEBUG=
+        shift
+        continue
 
-    ;; (--model=*)
-      QLLM_MODEL=${1#*=}
-      shift
-      continue
+      #-----------------------------------------------------------------
+      # --model=<model>, -m <model>
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    # Long options with required arguments: --foo bar to --foo=bar
-    #-------------------------------------------------------------------
+      ;; (--model=*)
+        QLLM_MODEL=${1#*=}
+        shift
+        continue
 
-    ;; ( \
-      --model \
-    )
-      if (($# < 2)); then
-        qsh_barf "$1 requires an argument"
-      fi
-      x=$1=$2
-      shift 2
-      set -- "$x" "$@"
-      continue
+      #-----------------------------------------------------------------
+      # Long options with required arguments: --foo bar to --foo=bar
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    # Short options with required arguments: -f bar to --foo=bar
-    #-------------------------------------------------------------------
+      ;; ( \
+        --model \
+      )
+        if (($# < 2)); then
+          qsh_barf "$1 requires an argument"
+        fi
+        x=$1=$2
+        shift 2
+        set -- "$x" "$@"
+        continue
 
-    ;; (-[m])
-      if (($# < 2)); then
-        qsh_barf "$1 requires an argument"
-      fi
-      x=${short_to_long[$1]}=$2
-      shift 2
-      set -- "$x" "$@"
-      continue
+      #-----------------------------------------------------------------
+      # Short options with required arguments: -f bar to --foo=bar
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    # Short options with required arguments: -fbar to --foo=bar
-    #-------------------------------------------------------------------
+      ;; (-[m])
+        if (($# < 2)); then
+          qsh_barf "$1 requires an argument"
+        fi
+        x=${short_to_long[$1]}=$2
+        shift 2
+        set -- "$x" "$@"
+        continue
 
-    ;; (-[m]?*)
-      x=${short_to_long[${1:0:2}]}=${1:2}
-      shift
-      set -- "$x" "$@"
-      continue
+      #-----------------------------------------------------------------
+      # Short options with required arguments: -fbar to --foo=bar
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    # Short options with forbidden arguments: -f to --foo
-    #-------------------------------------------------------------------
+      ;; (-[m]?*)
+        x=${short_to_long[${1:0:2}]}=${1:2}
+        shift
+        set -- "$x" "$@"
+        continue
 
-    ;; (-[d])
-      x=${short_to_long[$1]}
-      shift
-      set -- "$x" "$@"
-      continue
+      #-----------------------------------------------------------------
+      # Short options with forbidden arguments: -f to --foo
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    # Short options with forbidden arguments: -fbar to --foo -bar
-    #-------------------------------------------------------------------
+      ;; (-[d])
+        x=${short_to_long[$1]}
+        shift
+        set -- "$x" "$@"
+        continue
 
-    ;; (-[d]?*)
-      x=${short_to_long[${1:0:2}]}
-      y=-${1:2}
-      shift
-      set -- "$x" "$y" "$@"
-      continue
+      #-----------------------------------------------------------------
+      # Short options with forbidden arguments: -fbar to --foo -bar
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    # Long options incorrectly given arguments
-    #-------------------------------------------------------------------
+      ;; (-[d]?*)
+        x=${short_to_long[${1:0:2}]}
+        y=-${1:2}
+        shift
+        set -- "$x" "$y" "$@"
+        continue
 
-    ;; ( \
-      --=* \
-    )
-      x=${1%%=*}
-      qsh_barf "$x forbids an argument"
+      #-----------------------------------------------------------------
+      # Long options incorrectly given arguments
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    # Unknown long options
-    #-------------------------------------------------------------------
+      ;; ( \
+        --=* \
+      )
+        x=${1%%=*}
+        qsh_barf "$x forbids an argument"
 
-    ;; (--*)
-      x=${1%%=*}
-      qsh_barf "Unknown option: ${x@Q}"
+      #-----------------------------------------------------------------
+      # Unknown long options
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
-    # Unknown short options
-    #-------------------------------------------------------------------
+      ;; (--*)
+        x=${1%%=*}
+        qsh_barf "Unknown option: ${x@Q}"
 
-    ;; (-?*)
-      x=${1:0:2}
-      qsh_barf "Unknown option: ${x@Q}"
+      #-----------------------------------------------------------------
+      # Unknown short options
+      #-----------------------------------------------------------------
 
-    #-------------------------------------------------------------------
+      ;; (-?*)
+        x=${1:0:2}
+        qsh_barf "Unknown option: ${x@Q}"
+
+      #-----------------------------------------------------------------
+      esac
+    fi
+
+    if [[ ! ${session_file+x} ]]; then
+      session_file=$1
+    else
+      qsh_barf "Too many operands"
+    fi
+
+    shift
+
+  done
+
+  if [[ ! ${session_file+x} ]]; then
+    session_file=default.qllm
+  fi
+
+  session_file_new=$session_file.new
+  readonly session_file_new
+
+  if [[ ! ${QLLM_MODEL+x} ]]; then
+    qsh_barf "You must select a model using --model or QLLM_MODEL"
+  fi
+
+  #---------------------------------------------------------------------
+
+  unset vertex_bearer
+
+  vertex_init() {
+    if [[ ! ${vertex_bearer+x} ]]; then
+      vertex_bearer=$(gcloud auth print-access-token)
+      vertex_project=$(gcloud config get-value project)
+      vertex_location=global
+    fi
+    completions_url="https://aiplatform.googleapis.com/v1/projects/$vertex_project/locations/$vertex_location/endpoints/openapi/chat/completions"
+    completions_bearer=$vertex_bearer
+  }; readonly -f vertex_init
+
+  #---------------------------------------------------------------------
+
+  # TODO: google/gemini-3-pro-preview will be discontinued on 2026-03-26.
+
+  # These names are listed in Google Cloud's web UI under Vertex AI >
+  # Model Garden. If you go to a specific model, the name is listed as
+  # "Version name".
+  declare -A -r model_map=(
+    [vertex-gemini-2.5-flash]="google/gemini-2.5-flash"
+    [vertex-gemini-2.5-pro]="google/gemini-2.5-pro"
+    [vertex-gemini-3-pro-preview]="google/gemini-3-pro-preview"
+    [vertex-gemini-3.1-pro-preview]="google/gemini-3.1-pro-preview"
+  )
+
+  declare -A -r init_functions=(
+    [vertex-gemini-2.5-flash]=vertex_init
+    [vertex-gemini-2.5-pro]=vertex_init
+    [vertex-gemini-3-pro-preview]=vertex_init
+    [vertex-gemini-3.1-pro-preview]=vertex_init
+  )
+
+  #---------------------------------------------------------------------
+  # Parse VISUAL and friends
+  #---------------------------------------------------------------------
+
+  unset editor_bottom
+
+  if [[ ${VISUAL+x} ]]; then
+    editor=$VISUAL
+    if [[ ${VISUAL_BOTTOM+x} ]]; then
+      editor_bottom=$VISUAL_BOTTOM
+    fi
+  elif [[ ${EDITOR+x} ]]; then
+    editor=$EDITOR
+    if [[ ${EDITOR_BOTTOM+x} ]]; then
+      editor_bottom=$EDITOR_BOTTOM
+    fi
+  else
+    editor=vi
+    editor_bottom="-c '$'"
+  fi
+
+  if [[ ! ${editor_bottom+x} ]]; then
+    case $editor in (vi | vim)
+      editor_bottom="-c '$'"
     esac
   fi
 
-  if [[ ! ${session_file+x} ]]; then
-    session_file=$1
-  else
-    qsh_barf "Too many operands"
-  fi
+  editor="$editor ${editor_bottom-}"
+  readonly editor
 
-  shift
+  #---------------------------------------------------------------------
 
-done
+  gawk=gawk
+  jq=jq
 
-if [[ ! ${session_file+x} ]]; then
-  session_file=default.qllm
-fi
+  printf -v blank_heading -- -%.s {1..72}
+  readonly blank_heading
 
-session_file_new=$session_file.new
-readonly session_file_new
+  user_heading='@@@ user '
+  user_heading+=${blank_heading:${#user_heading}}
+  readonly user_heading
 
-if [[ ! ${QLLM_MODEL+x} ]]; then
-  qsh_barf "You must select a model using --model or QLLM_MODEL"
-fi
+  model_heading='@@@ model '
+  model_heading+=${blank_heading:${#model_heading}}
+  readonly model_heading
 
-#-----------------------------------------------------------------------
+  #---------------------------------------------------------------------
+  # qllm_to_completions_script
+  #---------------------------------------------------------------------
+  #
+  # This is the GNU Awk script that converts a .qllm file into a JSON
+  # completions request.
+  #
 
-unset vertex_bearer
+  qllm_to_completions_script=$(cat <<'EOF'
 
-vertex_init() {
-  if [[ ! ${vertex_bearer+x} ]]; then
-    vertex_bearer=$(gcloud auth print-access-token)
-    vertex_project=$(gcloud config get-value project)
-    vertex_location=global
-  fi
-  completions_url="https://aiplatform.googleapis.com/v1/projects/$vertex_project/locations/$vertex_location/endpoints/openapi/chat/completions"
-  completions_bearer=$vertex_bearer
-}; readonly -f vertex_init
-
-#-----------------------------------------------------------------------
-
-# TODO: google/gemini-3-pro-preview will be discontinued on 2026-03-26.
-
-# These names are listed in Google Cloud's web UI under Vertex AI >
-# Model Garden. If you go to a specific model, the name is listed as
-# "Version name".
-declare -A -r model_map=(
-  [vertex-gemini-2.5-flash]="google/gemini-2.5-flash"
-  [vertex-gemini-2.5-pro]="google/gemini-2.5-pro"
-  [vertex-gemini-3-pro-preview]="google/gemini-3-pro-preview"
-  [vertex-gemini-3.1-pro-preview]="google/gemini-3.1-pro-preview"
-)
-
-declare -A -r init_functions=(
-  [vertex-gemini-2.5-flash]=vertex_init
-  [vertex-gemini-2.5-pro]=vertex_init
-  [vertex-gemini-3-pro-preview]=vertex_init
-  [vertex-gemini-3.1-pro-preview]=vertex_init
-)
-
-#-----------------------------------------------------------------------
-# Parse VISUAL and friends
-#-----------------------------------------------------------------------
-
-unset editor_bottom
-
-if [[ ${VISUAL+x} ]]; then
-  editor=$VISUAL
-  if [[ ${VISUAL_BOTTOM+x} ]]; then
-    editor_bottom=$VISUAL_BOTTOM
-  fi
-elif [[ ${EDITOR+x} ]]; then
-  editor=$EDITOR
-  if [[ ${EDITOR_BOTTOM+x} ]]; then
-    editor_bottom=$EDITOR_BOTTOM
-  fi
-else
-  editor=vi
-  editor_bottom="-c '$'"
-fi
-
-if [[ ! ${editor_bottom+x} ]]; then
-  case $editor in (vi | vim)
-    editor_bottom="-c '$'"
-  esac
-fi
-
-editor="$editor ${editor_bottom-}"
-readonly editor
-
-#-----------------------------------------------------------------------
-
-gawk=gawk
-jq=jq
-
-printf -v blank_heading -- -%.s {1..72}
-readonly blank_heading
-
-user_heading='@@@ user '
-user_heading+=${blank_heading:${#user_heading}}
-readonly user_heading
-
-model_heading='@@@ model '
-model_heading+=${blank_heading:${#model_heading}}
-readonly model_heading
-
-#-----------------------------------------------------------------------
-# qllm_to_completions_script
-#-----------------------------------------------------------------------
-#
-# This is the GNU Awk script that converts a .qllm file into a JSON
-# completions request.
-#
-
-qllm_to_completions_script=$(cat <<'EOF'
-
-  function barf(message) {
-    print(argv0 ": " message) >"/dev/stderr";
-    exit_status = 1;
-    exit exit_status;
-  }
-
-  function command_filter(x, c,    s) {
-    printf("%s", x) |& c;
-    s = close(c, "to");
-    if (s != 0) {
-      barf("Command failed: " c);
-    }
-    c |& getline x;
-    s = close(c);
-    if (s != 0) {
-      barf("Command failed: " c);
-    }
-    return x;
-  }
-
-  function json_quote(x) {
-    return command_filter(x, "jq -R -s .");
-  }
-
-  function base64_encode(x) {
-    return command_filter(x, "base64");
-  }
-
-  function read_text_file(f,    xs, s, x) {
-    xs = "";
-    while ((s = (getline x < f)) > 0) {
-      sub("[\t ]+$", "", x);
-      xs = xs x "\n";
-    }
-    if (s < 0) {
-      barf("Error reading file " json_quote(f));
-    }
-    s = close(f);
-    if (s != 0) {
-      barf("Error closing file " json_quote(f));
-    }
-    sub("^\n+", "", xs);
-    sub("\n+$", "", xs);
-    return xs;
-  }
-
-  function get_fence_type(filename) {
-    if (filename ~ /\.[ch]$/) {
-      return "c";
-    }
-    return "";
-  }
-
-  function add_part(    x, y) {
-    x = buffer;
-    buffer = "";
-    if (role == "user" || role == "system") {
-      if (heredoc) {
-        if (x) {
-          x = x "\n";
-        }
-        y = "Here is the content of the file `" heredoc "`:\n\n";
-        x = y "```" get_fence_type(heredoc) "\n" x "```";
-        heredoc = "";
-      } else {
-        sub("^[\n ]*", "", x);
-        sub("[\n ]*$", "", x);
-        if (!x) {
-          return;
-        }
-      }
-      x = json_quote(x);
-      if (content) {
-        content = content ", ";
-      }
-      content = content "{";
-      content = content "\"type\": \"text\", ";
-      content = content "\"text\": " x;
-      content = content "}";
-    } else if (role == "assistant") {
-      if (!in_write_text_file) {
-        sub("^[\n ]*", "", x);
-        sub("[\n ]*$", "", x);
-        if (content) {
-          content = content "\n";
-        }
-        content = content x;
-      } else {
-        if (x) {
-          x = x "\n";
-        }
-        tool_call_id = json_quote(tool_call_id);
-        tool_call_path = json_quote(tool_call_path);
-        tool_call_content = json_quote(x);
-        if (tool_calls) {
-          tool_calls = tool_calls ", ";
-        }
-        tool_calls = tool_calls "{";
-        tool_calls = tool_calls "\"id\": " tool_call_id ", ";
-        tool_calls = tool_calls "\"type\": \"function\", ";
-        tool_calls = tool_calls "\"function\": {";
-        tool_calls = tool_calls "\"name\": \"write_text_file\", ";
-        x = "{";
-        x = x "\"path\": " tool_call_path ", ";
-        x = x "\"content\": " tool_call_content;
-        x = x "}";
-        x = json_quote(x);
-        tool_calls = tool_calls "\"arguments\": " x;
-        tool_calls = tool_calls "}";
-        tool_calls = tool_calls "}";
-        tool_call_answers = tool_call_answers ", ";
-        tool_call_answers = tool_call_answers "{";
-        tool_call_answers = tool_call_answers "\"role\": \"tool\", ";
-        tool_call_answers = tool_call_answers "\"tool_call_id\": " tool_call_id ", ";
-        tool_call_answers = tool_call_answers "\"content\": \"success\"";
-        tool_call_answers = tool_call_answers "}";
-        in_write_text_file = 0;
-      }
-    } else {
-      barf("Unknown role: " role);
-    }
-  }
-
-  function add_message() {
-    if (messages) {
-      messages = messages ", ";
-    }
-    if (role == "user" || role == "system") {
-      if (content) {
-        content = "[" content "]";
-      } else {
-        content = "\" \"";
-      }
-      messages = messages "{";
-      messages = messages "\"role\": \"" role "\", ";
-      messages = messages "\"content\": " content;
-      messages = messages "}";
-      content = "";
-    } else if (role == "assistant") {
-      messages = messages "{";
-      messages = messages "\"role\": \"" role "\"";
-      if (content || !tool_calls) {
-        content = json_quote(content);
-        messages = messages ", \"content\": " content;
-      }
-      if (tool_calls) {
-        messages = messages ", \"tool_calls\": [" tool_calls "]";
-      }
-      messages = messages "}";
-      messages = messages tool_call_answers;
-      content = "";
-      tool_calls = "";
-      tool_call_answers = "";
-    } else {
-      barf("Unknown role: " role);
-    }
-  }
-
-  function reject_in_inline_input() {
-    if (heredoc) {
-      barf("Directives cannot be used in an @@@<< block");
-    }
-  }
-
-  BEGIN {
-    role = "system";
-    buffer = system_prompt;
-    add_part();
-    add_message();
-    role = "user";
-
-    tools = "{";
-    tools = tools "\"type\": \"function\", ";
-    tools = tools "\"function\": {";
-    tools = tools "\"name\": \"write_text_file\", ";
-    tools = tools "\"description\": \"Create or overwrite a text file with the given content.\", ";
-    tools = tools "\"parameters\": {";
-    tools = tools "\"type\": \"object\", ";
-    tools = tools "\"properties\": {";
-    tools = tools "\"path\": {";
-    tools = tools "\"type\": \"string\",";
-    tools = tools "\"description\": \"A path to the text file to create or overwrite.\"";
-    tools = tools "},";
-    tools = tools "\"content\": {";
-    tools = tools "\"type\": \"string\",";
-    tools = tools "\"description\": \"The content to write to the text file.\"";
-    tools = tools "}";
-    tools = tools "},";
-    tools = tools "\"required\": [\"path\", \"content\"]";
-    tools = tools "}";
-    tools = tools "}";
-    tools = tools "}";
-  }
-
-  {
-    if ($0 ~ /^@@@ *user[ -]*$/) {
-      if (role == "assistant") {
-        add_part();
-        add_message();
-        role = "user";
-      }
-    } else if ($0 ~ /^@@@ *model[ -]*$/) {
-      if (role == "user") {
-        add_part();
-        add_message();
-        role = "assistant";
-      }
-    } else if (role == "user") {
-      z = $0;
-      if (sub(/^@@@ *<< */, "", z)) {
-        sub(/ *$/, "", z);
-        if (!z && !heredoc) {
-          barf("Orphan @@@<< block terminator");
-        }
-        add_part();
-        heredoc = z;
-      } else if (sub(/^@@@ *< */, "", z)) {
-        reject_in_inline_input();
-        sub(/ *$/, "", z);
-        if (!z) {
-          barf("The @@@< directive requires a filename");
-        }
-        add_part();
-        heredoc = z;
-        buffer = read_text_file(heredoc);
-        buffer2 = buffer;
-        add_part();
-        sub(/</, "<<", $0);
-        sub(/^@@@/, " @@@", buffer2);
-        gsub(/\n@@@/, "\n @@@", buffer2);
-        $0 = $0 "\n" buffer2 "\n@@@<<";
-      } else if (sub(/^@@@ *> */, "", z)) {
-        reject_in_inline_input();
-        sub(/ *$/, "", z);
-        if (z) {
-          z = json_quote(z);
-          if (output_patterns) {
-            output_patterns = output_patterns ", ";
-          }
-          output_patterns = output_patterns z;
-        }
-      } else if ($0 ~ /^@@@/) {
-        reject_in_inline_input();
-        barf("Unknown directive: " $0);
-      } else {
-        if (buffer) {
-          buffer = buffer "\n";
-        }
-        buffer = buffer $0;
-      }
-    } else {
-      z = $0;
-      if (sub(/^@@@ *> */, "", z)) {
-        sub(/ *$/, "", z);
-        if (!z && !in_write_text_file) {
-          barf("Orphan @@@> block terminator");
-        }
-        add_part();
-        if (z) {
-          sub(/ *$/, "", z);
-          if (split(z, foo, " ---- ") != 2) {
-            barf("Bad @@@> line");
-          }
-          in_write_text_file = 1;
-          tool_call_path = foo[1];
-          tool_call_id = foo[2];
-        }
-      } else if ($0 ~ /^@@@/) {
-        barf("Unknown directive: " $0);
-      } else {
-        if (buffer) {
-          buffer = buffer "\n";
-        }
-        buffer = buffer $0;
-      }
-    }
-    print $0 > session_file_new;
-  }
-
-  END {
-    if (exit_status) {
+    function barf(message) {
+      print(argv0 ": " message) >"/dev/stderr";
+      exit_status = 1;
       exit exit_status;
     }
-    if (heredoc) {
-      barf("Runaway @@@<< block");
+
+    function command_filter(x, c,    s) {
+      printf("%s", x) |& c;
+      s = close(c, "to");
+      if (s != 0) {
+        barf("Command failed: " c);
+      }
+      c |& getline x;
+      s = close(c);
+      if (s != 0) {
+        barf("Command failed: " c);
+      }
+      return x;
     }
-    add_part(buffer);
-    add_message();
-    body = "{";
-    body = body "\"model\": " json_quote(model) ", ";
-    body = body "\"messages\": [" messages "], ";
-    body = body "\"tools\": [" tools "], ";
-    body = body "\"qllm\": {";
-    body = body "\"output_patterns\": [" output_patterns "]";
-    body = body "}";
-    body = body "}";
-    print body;
-  }
+
+    function json_quote(x) {
+      return command_filter(x, "jq -R -s .");
+    }
+
+    function base64_encode(x) {
+      return command_filter(x, "base64");
+    }
+
+    function read_text_file(f,    xs, s, x) {
+      xs = "";
+      while ((s = (getline x < f)) > 0) {
+        sub("[\t ]+$", "", x);
+        xs = xs x "\n";
+      }
+      if (s < 0) {
+        barf("Error reading file " json_quote(f));
+      }
+      s = close(f);
+      if (s != 0) {
+        barf("Error closing file " json_quote(f));
+      }
+      sub("^\n+", "", xs);
+      sub("\n+$", "", xs);
+      return xs;
+    }
+
+    function get_fence_type(filename) {
+      if (filename ~ /\.[ch]$/) {
+        return "c";
+      }
+      return "";
+    }
+
+    function add_part(    x, y) {
+      x = buffer;
+      buffer = "";
+      if (role == "user" || role == "system") {
+        if (heredoc) {
+          if (x) {
+            x = x "\n";
+          }
+          y = "Here is the content of the file `" heredoc "`:\n\n";
+          x = y "```" get_fence_type(heredoc) "\n" x "```";
+          heredoc = "";
+        } else {
+          sub("^[\n ]*", "", x);
+          sub("[\n ]*$", "", x);
+          if (!x) {
+            return;
+          }
+        }
+        x = json_quote(x);
+        if (content) {
+          content = content ", ";
+        }
+        content = content "{";
+        content = content "\"type\": \"text\", ";
+        content = content "\"text\": " x;
+        content = content "}";
+      } else if (role == "assistant") {
+        if (!in_write_text_file) {
+          sub("^[\n ]*", "", x);
+          sub("[\n ]*$", "", x);
+          if (content) {
+            content = content "\n";
+          }
+          content = content x;
+        } else {
+          if (x) {
+            x = x "\n";
+          }
+          tool_call_id = json_quote(tool_call_id);
+          tool_call_path = json_quote(tool_call_path);
+          tool_call_content = json_quote(x);
+          if (tool_calls) {
+            tool_calls = tool_calls ", ";
+          }
+          tool_calls = tool_calls "{";
+          tool_calls = tool_calls "\"id\": " tool_call_id ", ";
+          tool_calls = tool_calls "\"type\": \"function\", ";
+          tool_calls = tool_calls "\"function\": {";
+          tool_calls = tool_calls "\"name\": \"write_text_file\", ";
+          x = "{";
+          x = x "\"path\": " tool_call_path ", ";
+          x = x "\"content\": " tool_call_content;
+          x = x "}";
+          x = json_quote(x);
+          tool_calls = tool_calls "\"arguments\": " x;
+          tool_calls = tool_calls "}";
+          tool_calls = tool_calls "}";
+          tool_call_answers = tool_call_answers ", ";
+          tool_call_answers = tool_call_answers "{";
+          tool_call_answers = tool_call_answers "\"role\": \"tool\", ";
+          tool_call_answers = tool_call_answers "\"tool_call_id\": " tool_call_id ", ";
+          tool_call_answers = tool_call_answers "\"content\": \"success\"";
+          tool_call_answers = tool_call_answers "}";
+          in_write_text_file = 0;
+        }
+      } else {
+        barf("Unknown role: " role);
+      }
+    }
+
+    function add_message() {
+      if (messages) {
+        messages = messages ", ";
+      }
+      if (role == "user" || role == "system") {
+        if (content) {
+          content = "[" content "]";
+        } else {
+          content = "\" \"";
+        }
+        messages = messages "{";
+        messages = messages "\"role\": \"" role "\", ";
+        messages = messages "\"content\": " content;
+        messages = messages "}";
+        content = "";
+      } else if (role == "assistant") {
+        messages = messages "{";
+        messages = messages "\"role\": \"" role "\"";
+        if (content || !tool_calls) {
+          content = json_quote(content);
+          messages = messages ", \"content\": " content;
+        }
+        if (tool_calls) {
+          messages = messages ", \"tool_calls\": [" tool_calls "]";
+        }
+        messages = messages "}";
+        messages = messages tool_call_answers;
+        content = "";
+        tool_calls = "";
+        tool_call_answers = "";
+      } else {
+        barf("Unknown role: " role);
+      }
+    }
+
+    function reject_in_inline_input() {
+      if (heredoc) {
+        barf("Directives cannot be used in an @@@<< block");
+      }
+    }
+
+    BEGIN {
+      role = "system";
+      buffer = system_prompt;
+      add_part();
+      add_message();
+      role = "user";
+
+      tools = "{";
+      tools = tools "\"type\": \"function\", ";
+      tools = tools "\"function\": {";
+      tools = tools "\"name\": \"write_text_file\", ";
+      tools = tools "\"description\": \"Create or overwrite a text file with the given content.\", ";
+      tools = tools "\"parameters\": {";
+      tools = tools "\"type\": \"object\", ";
+      tools = tools "\"properties\": {";
+      tools = tools "\"path\": {";
+      tools = tools "\"type\": \"string\",";
+      tools = tools "\"description\": \"A path to the text file to create or overwrite.\"";
+      tools = tools "},";
+      tools = tools "\"content\": {";
+      tools = tools "\"type\": \"string\",";
+      tools = tools "\"description\": \"The content to write to the text file.\"";
+      tools = tools "}";
+      tools = tools "},";
+      tools = tools "\"required\": [\"path\", \"content\"]";
+      tools = tools "}";
+      tools = tools "}";
+      tools = tools "}";
+    }
+
+    {
+      if ($0 ~ /^@@@ *user[ -]*$/) {
+        if (role == "assistant") {
+          add_part();
+          add_message();
+          role = "user";
+        }
+      } else if ($0 ~ /^@@@ *model[ -]*$/) {
+        if (role == "user") {
+          add_part();
+          add_message();
+          role = "assistant";
+        }
+      } else if (role == "user") {
+        z = $0;
+        if (sub(/^@@@ *<< */, "", z)) {
+          sub(/ *$/, "", z);
+          if (!z && !heredoc) {
+            barf("Orphan @@@<< block terminator");
+          }
+          add_part();
+          heredoc = z;
+        } else if (sub(/^@@@ *< */, "", z)) {
+          reject_in_inline_input();
+          sub(/ *$/, "", z);
+          if (!z) {
+            barf("The @@@< directive requires a filename");
+          }
+          add_part();
+          heredoc = z;
+          buffer = read_text_file(heredoc);
+          buffer2 = buffer;
+          add_part();
+          sub(/</, "<<", $0);
+          sub(/^@@@/, " @@@", buffer2);
+          gsub(/\n@@@/, "\n @@@", buffer2);
+          $0 = $0 "\n" buffer2 "\n@@@<<";
+        } else if (sub(/^@@@ *> */, "", z)) {
+          reject_in_inline_input();
+          sub(/ *$/, "", z);
+          if (z) {
+            z = json_quote(z);
+            if (output_patterns) {
+              output_patterns = output_patterns ", ";
+            }
+            output_patterns = output_patterns z;
+          }
+        } else if ($0 ~ /^@@@/) {
+          reject_in_inline_input();
+          barf("Unknown directive: " $0);
+        } else {
+          if (buffer) {
+            buffer = buffer "\n";
+          }
+          buffer = buffer $0;
+        }
+      } else {
+        z = $0;
+        if (sub(/^@@@ *> */, "", z)) {
+          sub(/ *$/, "", z);
+          if (!z && !in_write_text_file) {
+            barf("Orphan @@@> block terminator");
+          }
+          add_part();
+          if (z) {
+            sub(/ *$/, "", z);
+            if (split(z, foo, " ---- ") != 2) {
+              barf("Bad @@@> line");
+            }
+            in_write_text_file = 1;
+            tool_call_path = foo[1];
+            tool_call_id = foo[2];
+          }
+        } else if ($0 ~ /^@@@/) {
+          barf("Unknown directive: " $0);
+        } else {
+          if (buffer) {
+            buffer = buffer "\n";
+          }
+          buffer = buffer $0;
+        }
+      }
+      print $0 > session_file_new;
+    }
+
+    END {
+      if (exit_status) {
+        exit exit_status;
+      }
+      if (heredoc) {
+        barf("Runaway @@@<< block");
+      }
+      add_part(buffer);
+      add_message();
+      body = "{";
+      body = body "\"model\": " json_quote(model) ", ";
+      body = body "\"messages\": [" messages "], ";
+      body = body "\"tools\": [" tools "], ";
+      body = body "\"qllm\": {";
+      body = body "\"output_patterns\": [" output_patterns "]";
+      body = body "}";
+      body = body "}";
+      print body;
+    }
 
 EOF
-)
-readonly qllm_to_completions_script
-
-#-----------------------------------------------------------------------
-
-while :; do
-
-  model=${model_map[$QLLM_MODEL]-}
-  if [[ ! $model ]]; then
-    qsh_barf "Unknown model: ${QLLM_MODEL@Q}"
-  fi
-
-  ${init_functions[$QLLM_MODEL]}
-
-  if [[ -s "$session_file" ]]; then
-    x=$(tail -n 3 -- "$session_file"; echo x)
-    if [[ $x != "$user_heading"$'\n\n\nx' ]]; then
-      printf '\n\n\n%s\n\n\n' "$user_heading" >>"$session_file"
-    fi
-  else
-    printf '%s\n\n\n' "$user_heading" >>"$session_file"
-  fi
-
-  hash1=$(sha256sum -b -- "$session_file")
-
-  eval " $editor -- ${session_file@Q}"
-
-  hash2=$(sha256sum -b -- "$session_file")
-
-  if [[ $hash1 == "$hash2" ]]; then
-    break
-  fi
-
-  completions_request=$(
-    eval " $gawk"' \
-      -v argv0="$0" \
-      -v model="$model" \
-      -v session_file_new="$session_file_new" \
-      -v sq="$sq" \
-      -v system_prompt="$system_prompt" \
-      -- \
-      "$qllm_to_completions_script" \
-      "$session_file" \
-    ;'
   )
+  readonly qllm_to_completions_script
 
-  mv -f -- "$session_file_new" "$session_file"
-
-  if [[ ${QLLM_DEBUG+x} ]]; then
-    printf 'completions_request = %s\n' "$completions_request" >&2
-    x=$(jq . <<<"$completions_request" 2>&1)
-    printf 'parsed_completions_request = %s\n' "$x" >&2
-  fi
-
-  output_patterns=$(
-    eval " $jq"' -r '\''
-      .
-      | .qllm.output_patterns
-      | map(@sh)
-      | join(" ")
-    '\' <<<"$completions_request"
-  )
-  eval "output_patterns=($output_patterns)"
-
-  completions_request=$(
-    eval " $jq"' '\''
-      .
-      | del(.qllm)
-    '\' <<<"$completions_request"
-  )
-
-  curl_with_retries \
-    completions_response \
-    "$completions_request" \
-    '^(200)$' \
-    '^(401)$' \
-    -X POST \
-    --url "$completions_url" \
-    -H "Authorization: Bearer $completions_bearer" \
-    -H "Content-Type: application/json" \
-    --data-binary @- \
-  ;
-
-  if [[ ${QLLM_DEBUG+x} ]]; then
-    printf 'completions_response = %s\n' "$completions_response" >&2
-    x=$(jq . <<<"$completions_response" 2>&1)
-    printf 'parsed_completions_response = %s\n' "$x" >&2
-  fi
-
-  printf '\n\n%s' "$model_heading" >>"$session_file"
+  #---------------------------------------------------------------------
 
   while :; do
 
-    x=$(
-      eval " $jq"' -r '\''
-        .
-        | .choices[0].message.content // ""
-        | sub("^\\s+"; "")
-        | sub("\\s+$"; "")
-        | sub("^@@@"; " @@@")
-        | gsub("\n@@@"; "\n @@@")
-        | if . == "" then . else "\n\n" + . end
-      '\' <<<"$completions_response"
-    )
-    printf '%s' "$x" >>"$session_file"
+    model=${model_map[$QLLM_MODEL]-}
+    if [[ ! $model ]]; then
+      qsh_barf "Unknown model: ${QLLM_MODEL@Q}"
+    fi
 
-    xs=$(
-      eval " $jq"' -r '\''
-        .
-        | .choices[0].message.tool_calls // []
-        | map(.
-            | .id as $id
-            | .function
-            | select(.name == "write_text_file")
-            | .arguments
-            | fromjson
-            | .content |= (
-                if endswith("\n") then . else . + "\n" end
-              )
-            | [
-                "id=\($id | @sh)",
-                "path=\(.path | @sh)",
-                "content=\(.content | @sh)"
-              ]
-            | join(";")
-            | @sh
-          )
-        | join(" ")
-      '\' <<<"$completions_response"
-    )
-    eval "xs=($xs)"
+    ${init_functions[$QLLM_MODEL]}
 
-    if ((${#xs[@]} == 0)); then
+    if [[ -s "$session_file" ]]; then
+      x=$(tail -n 3 -- "$session_file"; echo x)
+      if [[ $x != "$user_heading"$'\n\n\nx' ]]; then
+        printf '\n\n\n%s\n\n\n' "$user_heading" >>"$session_file"
+      fi
+    else
+      printf '%s\n\n\n' "$user_heading" >>"$session_file"
+    fi
+
+    hash1=$(sha256sum -b -- "$session_file")
+
+    eval " $editor -- ${session_file@Q}"
+
+    hash2=$(sha256sum -b -- "$session_file")
+
+    if [[ $hash1 == "$hash2" ]]; then
       break
     fi
 
     completions_request=$(
-      eval " $jq"' -s '\''
-        .
-        | .[0].messages += [.[1].choices[0].message]
-        | .[0]
-      '\' <<<"$completions_request $completions_response"
+      eval " $gawk"' \
+        -v argv0="$0" \
+        -v model="$model" \
+        -v session_file_new="$session_file_new" \
+        -v sq="$sq" \
+        -v system_prompt="$system_prompt" \
+        -- \
+        "$qllm_to_completions_script" \
+        "$session_file" \
+      ;'
     )
 
-    for x in "${xs[@]}"; do
-
-      eval "$x"
-
-      case $path in (*$'\n'*)
-        qsh_barf "Path contains a newline"
-      esac
-
-      case $path in (/* | .. | ../* | */../* | */..)
-        continue
-      esac
-
-      for output_pattern in "${output_patterns[@]}"; do
-        if [[ $path == $output_pattern ]]; then
-          if [[ $path == */* ]]; then
-            mkdir -p -- "${path%/*}"
-          fi
-          printf -- %s "$content" >"$path"
-          break
-        fi
-      done
-
-      printf '\n\n%s\n' "@@@> $path ---- $id" >>"$session_file"
-
-      content=${content/#@@@/ @@@}
-      content=${content//$'\n@@@'/$'\n @@@'}
-      printf '%s' "$content@@@>" >>"$session_file"
-
-      completions_request=$(
-        eval " $jq"' --arg id "$id" '\''
-          .messages += [{
-            role: "tool",
-            tool_call_id: $id,
-            content: "success",
-          }]
-        '\' <<<"$completions_request"
-      )
-
-    done
+    mv -f -- "$session_file_new" "$session_file"
 
     if [[ ${QLLM_DEBUG+x} ]]; then
       printf 'completions_request = %s\n' "$completions_request" >&2
-      x=$(eval " $jq ." <<<"$completions_request" 2>&1)
+      x=$(jq . <<<"$completions_request" 2>&1)
       printf 'parsed_completions_request = %s\n' "$x" >&2
     fi
+
+    output_patterns=$(
+      eval " $jq"' -r '\''
+        .
+        | .qllm.output_patterns
+        | map(@sh)
+        | join(" ")
+      '\' <<<"$completions_request"
+    )
+    eval "output_patterns=($output_patterns)"
+
+    completions_request=$(
+      eval " $jq"' '\''
+        .
+        | del(.qllm)
+      '\' <<<"$completions_request"
+    )
 
     curl_with_retries \
       completions_response \
@@ -956,10 +839,133 @@ while :; do
 
     if [[ ${QLLM_DEBUG+x} ]]; then
       printf 'completions_response = %s\n' "$completions_response" >&2
-      x=$(eval " $jq ." <<<"$completions_response" 2>&1)
+      x=$(jq . <<<"$completions_response" 2>&1)
       printf 'parsed_completions_response = %s\n' "$x" >&2
     fi
 
+    printf '\n\n%s' "$model_heading" >>"$session_file"
+
+    while :; do
+
+      x=$(
+        eval " $jq"' -r '\''
+          .
+          | .choices[0].message.content // ""
+          | sub("^\\s+"; "")
+          | sub("\\s+$"; "")
+          | sub("^@@@"; " @@@")
+          | gsub("\n@@@"; "\n @@@")
+          | if . == "" then . else "\n\n" + . end
+        '\' <<<"$completions_response"
+      )
+      printf '%s' "$x" >>"$session_file"
+
+      xs=$(
+        eval " $jq"' -r '\''
+          .
+          | .choices[0].message.tool_calls // []
+          | map(.
+              | .id as $id
+              | .function
+              | select(.name == "write_text_file")
+              | .arguments
+              | fromjson
+              | .content |= (
+                  if endswith("\n") then . else . + "\n" end
+                )
+              | [
+                  "id=\($id | @sh)",
+                  "path=\(.path | @sh)",
+                  "content=\(.content | @sh)"
+                ]
+              | join(";")
+              | @sh
+            )
+          | join(" ")
+        '\' <<<"$completions_response"
+      )
+      eval "xs=($xs)"
+
+      if ((${#xs[@]} == 0)); then
+        break
+      fi
+
+      completions_request=$(
+        eval " $jq"' -s '\''
+          .
+          | .[0].messages += [.[1].choices[0].message]
+          | .[0]
+        '\' <<<"$completions_request $completions_response"
+      )
+
+      for x in "${xs[@]}"; do
+
+        eval "$x"
+
+        case $path in (*$'\n'*)
+          qsh_barf "Path contains a newline"
+        esac
+
+        case $path in (/* | .. | ../* | */../* | */..)
+          continue
+        esac
+
+        for output_pattern in "${output_patterns[@]}"; do
+          if [[ $path == $output_pattern ]]; then
+            if [[ $path == */* ]]; then
+              mkdir -p -- "${path%/*}"
+            fi
+            printf -- %s "$content" >"$path"
+            break
+          fi
+        done
+
+        printf '\n\n%s\n' "@@@> $path ---- $id" >>"$session_file"
+
+        content=${content/#@@@/ @@@}
+        content=${content//$'\n@@@'/$'\n @@@'}
+        printf '%s' "$content@@@>" >>"$session_file"
+
+        completions_request=$(
+          eval " $jq"' --arg id "$id" '\''
+            .messages += [{
+              role: "tool",
+              tool_call_id: $id,
+              content: "success",
+            }]
+          '\' <<<"$completions_request"
+        )
+
+      done
+
+      if [[ ${QLLM_DEBUG+x} ]]; then
+        printf 'completions_request = %s\n' "$completions_request" >&2
+        x=$(eval " $jq ." <<<"$completions_request" 2>&1)
+        printf 'parsed_completions_request = %s\n' "$x" >&2
+      fi
+
+      curl_with_retries \
+        completions_response \
+        "$completions_request" \
+        '^(200)$' \
+        '^(401)$' \
+        -X POST \
+        --url "$completions_url" \
+        -H "Authorization: Bearer $completions_bearer" \
+        -H "Content-Type: application/json" \
+        --data-binary @- \
+      ;
+
+      if [[ ${QLLM_DEBUG+x} ]]; then
+        printf 'completions_response = %s\n' "$completions_response" >&2
+        x=$(eval " $jq ." <<<"$completions_response" 2>&1)
+        printf 'parsed_completions_response = %s\n' "$x" >&2
+      fi
+
+    done
+
   done
 
-done
+}; readonly -f main
+
+main "$@"
