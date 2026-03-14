@@ -677,9 +677,12 @@ qllm_to_completions_script=$(cat <<'EOF'
         add_part();
         heredoc = z;
         buffer = read_text_file(heredoc);
-        sub(/</, "<<", $0);
-        $0 = $0 "\n" buffer "\n@@@<<";
+        buffer2 = buffer;
         add_part();
+        sub(/</, "<<", $0);
+        sub(/^@@@/, " @@@", buffer2);
+        gsub(/\n@@@/, "\n @@@", buffer2);
+        $0 = $0 "\n" buffer2 "\n@@@<<";
       } else if (sub(/^@@@ *> */, "", z)) {
         reject_in_inline_input();
         sub(/ *$/, "", z);
