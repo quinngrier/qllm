@@ -192,6 +192,22 @@ curl_with_retries() {
 }; readonly -f curl_with_retries
 
 #-----------------------------------------------------------------------
+# Vertex AI
+#-----------------------------------------------------------------------
+
+unset vertex_bearer
+
+vertex_init() {
+  if [[ ! ${vertex_bearer+x} ]]; then
+    vertex_bearer=$(gcloud auth print-access-token)
+    vertex_project=$(gcloud config get-value project)
+    vertex_location=global
+  fi
+  completions_url="https://aiplatform.googleapis.com/v1/projects/$vertex_project/locations/$vertex_location/endpoints/openapi/chat/completions"
+  completions_bearer=$vertex_bearer
+}; readonly -f vertex_init
+
+#-----------------------------------------------------------------------
 
 main() {
 
@@ -364,20 +380,6 @@ main() {
   if [[ ! ${QLLM_MODEL+x} ]]; then
     qsh_barf "You must select a model using --model or QLLM_MODEL"
   fi
-
-  #---------------------------------------------------------------------
-
-  unset vertex_bearer
-
-  vertex_init() {
-    if [[ ! ${vertex_bearer+x} ]]; then
-      vertex_bearer=$(gcloud auth print-access-token)
-      vertex_project=$(gcloud config get-value project)
-      vertex_location=global
-    fi
-    completions_url="https://aiplatform.googleapis.com/v1/projects/$vertex_project/locations/$vertex_location/endpoints/openapi/chat/completions"
-    completions_bearer=$vertex_bearer
-  }; readonly -f vertex_init
 
   #---------------------------------------------------------------------
 
