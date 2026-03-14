@@ -610,6 +610,12 @@ qllm_to_completions_script=$(cat <<'EOF'
     }
   }
 
+  function reject_in_inline_input() {
+    if (heredoc) {
+      barf("Directives cannot be used in an @@@<< block");
+    }
+  }
+
   BEGIN {
     role = "system";
     buffer = system_prompt;
@@ -663,9 +669,7 @@ qllm_to_completions_script=$(cat <<'EOF'
         add_part();
         heredoc = z;
       } else if (sub(/^@@@ *< */, "", z)) {
-        if (heredoc) {
-          barf("Directives cannot be used in an @@@<< block");
-        }
+        reject_in_inline_input();
         sub(/ *$/, "", z);
         if (!z) {
           barf("The @@@< directive requires a filename");
@@ -677,9 +681,7 @@ qllm_to_completions_script=$(cat <<'EOF'
         $0 = $0 "\n" buffer "\n@@@<<";
         add_part();
       } else if (sub(/^@@@ *> */, "", z)) {
-        if (heredoc) {
-          barf("Directives cannot be used in an @@@<< block");
-        }
+        reject_in_inline_input();
         sub(/ *$/, "", z);
         if (z) {
           z = json_quote(z);
@@ -689,9 +691,7 @@ qllm_to_completions_script=$(cat <<'EOF'
           output_patterns = output_patterns z;
         }
       } else if ($0 ~ /^@@@/) {
-        if (heredoc) {
-          barf("Directives cannot be used in an @@@<< block");
-        }
+        reject_in_inline_input();
         barf("Unknown directive: " $0);
       } else {
         if (buffer) {
