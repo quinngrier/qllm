@@ -446,7 +446,7 @@ readonly model_heading
 # qllm_to_completions_gawk
 #-----------------------------------------------------------------------
 
-declare -r qllm_to_completions_gawk='
+qllm_to_completions_gawk=$(cat <<'EOF'
 
   function barf(message) {
     print(argv0 ": " message) >"/dev/stderr";
@@ -735,7 +735,9 @@ declare -r qllm_to_completions_gawk='
     print body;
   }
 
-'
+EOF
+)
+readonly qllm_to_completions_gawk
 
 #-----------------------------------------------------------------------
 
