@@ -155,7 +155,6 @@ curl_retry() {
 
   local num_retries__vnrf=0
   local retry_delay__vnrf=1
-  local response_body__vnrf
   local response_code__vnrf
   while :; do
     if [[ $request_body__vnrf ]]; then
@@ -191,8 +190,6 @@ curl_retry() {
       qsh_barf "HTTPS request failed with response code $response_code__vnrf"
     fi
   done
-
-  response_body__vnrf=$response_body__vnrf
 
 }; readonly -f curl_retry
 
