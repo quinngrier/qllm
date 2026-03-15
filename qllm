@@ -127,14 +127,14 @@ search_up_or_home() {
 }; readonly -f search_up_or_home
 
 #-----------------------------------------------------------------------
-# curl_with_retries <&response_body> <request_body>
-#                   <success_code_regex> <retry_code_regex>
-#                   <arg>...
+# curl_retry <&response_body> <request_body>
+#            <success_code_regex> <retry_code_regex>
+#            <arg>...
 #-----------------------------------------------------------------------
 
-curl_with_retries() {
+curl_retry() {
 
-  local -n curl_with_retries__response_body="$1"
+  local -n curl_retry__response_body="$1"
   shift
 
   local -r request_body="$1"
@@ -187,9 +187,9 @@ curl_with_retries() {
     fi
   done
 
-  curl_with_retries__response_body=$response_body
+  curl_retry__response_body=$response_body
 
-}; readonly -f curl_with_retries
+}; readonly -f curl_retry
 
 #-----------------------------------------------------------------------
 # Vertex AI
@@ -832,7 +832,7 @@ EOF
       '\' <<<"$completions_request"
     )
 
-    curl_with_retries \
+    curl_retry \
       completions_response \
       "$completions_request" \
       '^(200)$' \
@@ -951,7 +951,7 @@ EOF
         printf 'parsed_completions_request = %s\n' "$x" >&2
       fi
 
-      curl_with_retries \
+      curl_retry \
         completions_response \
         "$completions_request" \
         '^(200)$' \
