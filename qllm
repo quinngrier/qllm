@@ -759,18 +759,17 @@ EOF
   #---------------------------------------------------------------------
 
   provider_init=${init_functions[$QLLM_MODEL]}
+  $provider_init
+
+  model=${model_map[$QLLM_MODEL]-}
+  if [[ ! $model ]]; then
+    qsh_barf "Unknown model: ${QLLM_MODEL@Q}"
+  fi
 
   retry_code_regex='^(401|429)$'
   readonly retry_code_regex
 
   while :; do
-
-    model=${model_map[$QLLM_MODEL]-}
-    if [[ ! $model ]]; then
-      qsh_barf "Unknown model: ${QLLM_MODEL@Q}"
-    fi
-
-    $provider_init
 
     if [[ -s "$session_file" ]]; then
       x=$(tail -n 3 -- "$session_file"; echo x)
