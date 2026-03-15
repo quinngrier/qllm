@@ -11,8 +11,8 @@
 = Qllm
 :experimental:
 
-:x_download_url: https://raw.githubusercontent.com/quinngrier/qllm/main/qllm
-:x_man_page_url: https://github.com/quinngrier/qllm/blob/main/qllm.1.adoc
+:q_download_url: https://raw.githubusercontent.com/quinngrier/qllm/main/qllm
+:q_man_page_url: https://github.com/quinngrier/qllm/blob/main/qllm.1.adoc
 
 Qllm is an LLM CLI tool.
 
@@ -37,7 +37,7 @@ You can check this by running `jq --version`.
 ... Google Cloud SDK version 532.0.0 or later.
 You can check this by running `gcloud --version`.
 
-. Download the link:{x_download_url}[`qllm`] script and optionally put
+. Download the link:{q_download_url}[`qllm`] script and optionally put
 it in your `PATH`.
 
 . Set your `VISUAL` environment variable to your text editor.
