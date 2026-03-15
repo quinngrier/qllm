@@ -129,7 +129,6 @@ search_up_or_home() {
 #-----------------------------------------------------------------------
 # curl_retry <&response_body> <request_body>
 #            <success_code_regex> <retry_code_regex>
-#            <provider_init>
 #            <arg>...
 #-----------------------------------------------------------------------
 
@@ -145,9 +144,6 @@ curl_retry() {
   shift
 
   local -r retry_code_regex__vnrf="$1"
-  shift
-
-  local -r provider_init__vnrf="$1"
   shift
 
   local -r max_retries__vnrf=4
@@ -186,7 +182,7 @@ curl_retry() {
       ((retry_delay__vnrf *= 2))
       qsh_warn "HTTPS request failed with response code $response_code__vnrf"
       sleep $retry_delay__vnrf
-      $provider_init__vnrf
+      $provider_init
       continue
     else
       qsh_barf "HTTPS request failed with response code $response_code__vnrf"
@@ -210,7 +206,6 @@ vertex_init() {
 
 main() {
 
-  local provider_init
   local retry_code_regex
 
   declare -r \
@@ -764,7 +759,6 @@ EOF
   #---------------------------------------------------------------------
 
   provider_init=${init_functions[$QLLM_MODEL]}
-  readonly provider_init
 
   retry_code_regex='^(401|429)$'
   readonly retry_code_regex
@@ -840,7 +834,6 @@ EOF
       "$completions_request" \
       '^(200)$' \
       "$retry_code_regex" \
-      $provider_init \
       -X POST \
       --url "$completions_url" \
       -H "Content-Type: application/json" \
@@ -959,7 +952,6 @@ EOF
         "$completions_request" \
         '^(200)$' \
         "$retry_code_regex" \
-        $provider_init \
         -X POST \
         --url "$completions_url" \
         -H "Content-Type: application/json" \
