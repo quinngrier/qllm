@@ -99,16 +99,16 @@ shopt -s \
 #
 
 search_up() {
-  local -n search_up__r=$1
-  local search_up__d="$PWD"
-  while [[ $search_up__d ]]; do
-    search_up__r=${search_up__d%/}/$2
-    if [[ -e $search_up__r ]]; then
+  local -n r__tkvd=$1
+  local d__tkvd="$PWD"
+  while [[ $d__tkvd ]]; do
+    r__tkvd=${d__tkvd%/}/$2
+    if [[ -e $r__tkvd ]]; then
       return
     fi
-    search_up__d=${search_up__d%/*}
+    d__tkvd=${d__tkvd%/*}
   done
-  search_up__r=
+  r__tkvd=
 }; readonly -f search_up
 
 #-----------------------------------------------------------------------
@@ -119,10 +119,10 @@ search_up() {
 #
 
 search_up_or_home() {
-  local -n search_up_or_home__r=$1
-  search_up search_up_or_home__r "$2"
-  if [[ ! $search_up_or_home__r && -e $HOME/$2 ]]; then
-    search_up_or_home__r=$HOME/$2
+  local -n r__jkxm=$1
+  search_up r__jkxm "$2"
+  if [[ ! $r__jkxm && -e $HOME/$2 ]]; then
+    r__jkxm=$HOME/$2
   fi
 }; readonly -f search_up_or_home
 
@@ -134,60 +134,60 @@ search_up_or_home() {
 
 curl_retry() {
 
-  local -n curl_retry__response_body="$1"
+  local -n response_body__vnrf="$1"
   shift
 
-  local -r request_body="$1"
+  local -r request_body__vnrf="$1"
   shift
 
-  local -r success_code_regex="$1"
+  local -r success_code_regex__vnrf="$1"
   shift
 
-  local -r retry_code_regex="$1"
+  local -r retry_code_regex__vnrf="$1"
   shift
 
-  local -r max_retries=4
-  local -r write_out='\n%{http_code}'
+  local -r max_retries__vnrf=4
+  local -r write_out__vnrf='\n%{http_code}'
 
-  local num_retries=0
-  local retry_delay=1
-  local response_body
-  local response_code
+  local num_retries__vnrf=0
+  local retry_delay__vnrf=1
+  local response_body__vnrf
+  local response_code__vnrf
   while :; do
-    if [[ $request_body ]]; then
-      response_body=$(
+    if [[ $request_body__vnrf ]]; then
+      response_body__vnrf=$(
         curl -L -S -s \
-          -w "$write_out" \
+          -w "$write_out__vnrf" \
           "$@" \
-          <<<"$request_body" \
+          <<<"$request_body__vnrf" \
         ;
       )
     else
-      response_body=$(
+      response_body__vnrf=$(
         curl -L -S -s \
-          -w "$write_out" \
+          -w "$write_out__vnrf" \
           "$@" \
         ;
       )
     fi
-    response_code=${response_body##*$'\n'}
-    response_body=${response_body%$'\n'*}
-    if [[ $response_code =~ $success_code_regex ]]; then
+    response_code__vnrf=${response_body__vnrf##*$'\n'}
+    response_body__vnrf=${response_body__vnrf%$'\n'*}
+    if [[ $response_code__vnrf =~ $success_code_regex__vnrf ]]; then
       break
-    elif [[ $response_code =~ $retry_code_regex ]]; then
-      if ((++num_retries > max_retries)); then
+    elif [[ $response_code__vnrf =~ $retry_code_regex__vnrf ]]; then
+      if ((++num_retries__vnrf > max_retries__vnrf)); then
         qsh_barf "HTTPS request retry limit exceeded"
       fi
-      ((retry_delay *= 2))
-      qsh_warn "HTTPS request failed with response code $response_code"
-      sleep $retry_delay
+      ((retry_delay__vnrf *= 2))
+      qsh_warn "HTTPS request failed with response code $response_code__vnrf"
+      sleep $retry_delay__vnrf
       continue
     else
-      qsh_barf "HTTPS request failed with response code $response_code"
+      qsh_barf "HTTPS request failed with response code $response_code__vnrf"
     fi
   done
 
-  curl_retry__response_body=$response_body
+  response_body__vnrf=$response_body__vnrf
 
 }; readonly -f curl_retry
 
