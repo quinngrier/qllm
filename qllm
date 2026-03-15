@@ -129,7 +129,7 @@ search_up_or_home() {
 #-----------------------------------------------------------------------
 # curl_retry <&response_body> <request_body>
 #            <success_code_regex> <retry_code_regex>
-#            <provider_init> <&bearer>
+#            <provider_init>
 #            <arg>...
 #-----------------------------------------------------------------------
 
@@ -150,9 +150,6 @@ curl_retry() {
   local -r provider_init__vnrf="$1"
   shift
 
-  local -n bearer__vnrf="$1"
-  shift
-
   local -r max_retries__vnrf=4
   local -r write_out__vnrf='\n%{http_code}'
 
@@ -163,7 +160,7 @@ curl_retry() {
     if [[ $request_body__vnrf ]]; then
       response_body__vnrf=$(
         curl -L -S -s \
-          -H "Authorization: Bearer $bearer__vnrf" \
+          -H "Authorization: Bearer $provider_bearer" \
           -w "$write_out__vnrf" \
           "$@" \
           <<<"$request_body__vnrf" \
@@ -172,7 +169,7 @@ curl_retry() {
     else
       response_body__vnrf=$(
         curl -L -S -s \
-          -H "Authorization: Bearer $bearer__vnrf" \
+          -H "Authorization: Bearer $provider_bearer" \
           -w "$write_out__vnrf" \
           "$@" \
         ;
@@ -203,7 +200,7 @@ curl_retry() {
 #-----------------------------------------------------------------------
 
 vertex_init() {
-  vertex_bearer=$(gcloud auth print-access-token)
+  provider_bearer=$(gcloud auth print-access-token)
   vertex_project=$(gcloud config get-value project)
   vertex_location=global
   completions_url="https://aiplatform.googleapis.com/v1/projects/$vertex_project/locations/$vertex_location/endpoints/openapi/chat/completions"
@@ -844,7 +841,6 @@ EOF
       '^(200)$' \
       "$retry_code_regex" \
       $provider_init \
-      vertex_bearer \
       -X POST \
       --url "$completions_url" \
       -H "Content-Type: application/json" \
@@ -964,7 +960,6 @@ EOF
         '^(200)$' \
         "$retry_code_regex" \
         $provider_init \
-        vertex_bearer \
         -X POST \
         --url "$completions_url" \
         -H "Content-Type: application/json" \
